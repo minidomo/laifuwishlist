@@ -68,18 +68,23 @@ client.on('messageCreate', async message => {
         if (message.embeds.length === 1) {
             const [embed] = message.embeds;
             if (laifu.embed.isView(embed) || laifu.embed.isBurn(embed) || laifu.embed.isInfo(embed)) {
-                const character = {
-                    gid: laifu.embed.getGID(embed),
-                    name: laifu.embed.getName(embed),
-                    series: {
-                        eng: laifu.embed.getEngSeries(embed),
-                        jp: laifu.embed.getJpSeries(embed),
-                        sid: laifu.embed.getSID(embed),
-                    },
-                };
-                database.add(character);
-                const type = laifu.embed.isView(embed) ? 'VIEW' : (laifu.embed.isBurn(embed) ? 'BURN' : 'INFO');
-                console.log(type, 'ADDED', character);
+                try {
+                    const character = {
+                        gid: laifu.embed.getGID(embed),
+                        name: laifu.embed.getName(embed),
+                        series: {
+                            eng: laifu.embed.getEngSeries(embed),
+                            jp: laifu.embed.getJpSeries(embed),
+                            sid: laifu.embed.getSID(embed),
+                        },
+                    };
+                    database.add(character);
+                    const type = laifu.embed.isView(embed) ? 'VIEW' : (laifu.embed.isBurn(embed) ? 'BURN' : 'INFO');
+                    console.log(type, 'ADDED', character);
+                } catch (err) {
+                    const type = laifu.embed.isView(embed) ? 'VIEW' : (laifu.embed.isBurn(embed) ? 'BURN' : 'INFO');
+                    console.error(err, type, embed);
+                }
             }
         }
     }
