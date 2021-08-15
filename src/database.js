@@ -182,4 +182,16 @@ module.exports = {
     querySeries(seriesQueryOptions) {
         return this.query(seriesQueryOptions);
     },
+    /**
+     * @returns {number}
+     */
+    characterCount() {
+        return database.characters.size;
+    },
+    /**
+     * @returns {number}
+     */
+    seriesCount() {
+        return database.series.size;
+    },
 };

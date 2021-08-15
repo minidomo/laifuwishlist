@@ -61,7 +61,8 @@ client.on('messageCreate', async message => {
         if (message.content.startsWith(mention)) {
             const trimmed = message.content.substr(mention.length).trim().toLowerCase();
             switch (trimmed) {
-                case 'filler': {
+                case 'current': {
+                    await message.reply(`Currently have data on ${database.characterCount()} characters and ${database.seriesCount()} series`);
                     break;
                 }
             }
