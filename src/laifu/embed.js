@@ -84,7 +84,7 @@ module.exports = {
     * @returns {string}
     */
     getName(embed) {
-        const REGEX = /(?:. )?(?:#\d )(.+) [(][^(]+/;
+        const REGEX = /(?:. )?(?:#\d )?(.+) [(][^(]+/;
         const [, name] = REGEX.exec(embed.title);
         return name;
     },
