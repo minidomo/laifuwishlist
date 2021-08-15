@@ -43,8 +43,10 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
     /**
      * @param {Error} err
      */
-    console.error = function (err) {
-        log('error', [err.name, err.message, err.stack]);
+    console.error = function () {
+        const arr = [...arguments];
+        const err = arr.shift();
+        log('error', [err.name, err.message, err.stack, ...arr]);
     };
 })();
 
