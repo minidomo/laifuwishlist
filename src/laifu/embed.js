@@ -84,8 +84,13 @@ module.exports = {
     * @returns {string}
     */
     getName(embed) {
-        const REGEX = /(?:. )?(?:#\d )?(.+) [(][^(]+/;
-        const [, name] = REGEX.exec(embed.title);
+        // order of regex test matters
+        const arr = [
+            /#\d (.+) [(][^(]+/,
+            /(.+) [(][^(]+/,
+        ];
+        const regex = arr.find(r => r.test(embed.title));
+        const [, name] = regex.exec(embed.title);
         return name;
     },
 };
