@@ -83,7 +83,7 @@ client.on('messageCreate', async message => {
                     };
                     database.add(character);
                     const type = laifu.embed.isView(embed) ? 'VIEW' : (laifu.embed.isBurn(embed) ? 'BURN' : 'INFO');
-                    console.log(type, 'ADDED', character);
+                    console.log(type, 'ADDED', character.name);
                 } catch (err) {
                     const type = laifu.embed.isView(embed) ? 'VIEW' : (laifu.embed.isBurn(embed) ? 'BURN' : 'INFO');
                     console.error(err, type, embed);
@@ -112,7 +112,7 @@ client.on('messageUpdate', async message => {
                             },
                         };
                         database.add(character);
-                        console.log('GACHA', 'ADDED', character);
+                        console.log('GACHA', 'ADDED', character.name);
                     }
                 }
             })
