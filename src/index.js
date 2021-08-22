@@ -131,7 +131,6 @@ if (process.argv.length > 2 && process.argv[2] === '--production') {
     client.login(process.env.DEV_TOKEN);
 }
 
-process.on('SIGKILL', process.exit);
 process.on('SIGINT', process.exit);
 process.on('exit', () => {
     database.export();
