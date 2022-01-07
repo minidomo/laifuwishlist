@@ -21,7 +21,10 @@ const laifuFunction = message => {
 
     const Identifier = Laifu.Identifier;
     const Character = Laifu.Character;
-    if (Identifier.isViewEmbed(embed) || Identifier.isBurnEmbed(embed) || Identifier.isGachaCharacterEmbed(embed)) {
+    if (Identifier.isViewEmbed(embed)
+        || Identifier.isBurnEmbed(embed)
+        || Identifier.isGachaCharacterEmbed(embed)
+        || Identifier.isInfoEmbed(embed)) {
         const character = {
             gid: Character.getGid(embed),
             name: Character.getName(embed),
