@@ -1,0 +1,8 @@
+{
+    "data": {
+        "location": "./data/characters-packed.txt"
+    },
+    "logs": {
+        "dir": "./logs"
+    }
+}

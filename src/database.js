@@ -1,5 +1,8 @@
+'use strict';
+
 const fs = require('fs');
 const jsonpack = require('jsonpack');
+const config = require('../config.json');
 
 /**
  * @typedef {Object} Series
@@ -58,7 +61,7 @@ const database = (() => {
         series: new Map(),
     };
 
-    const loc = './data/characters-packed.txt';
+    const loc = config.data.location;
     if (fs.existsSync(loc)) {
         const raw = fs.readFileSync(loc, { encoding: 'utf-8' });
         /**
@@ -90,7 +93,7 @@ module.exports = {
         const arr = [];
         database.characters.forEach(character => arr.push(character));
         const packed = jsonpack.pack(arr);
-        fs.writeFileSync('./data/characters-packed.txt', packed, { encoding: 'utf-8' });
+        fs.writeFileSync(config.data.location, packed, { encoding: 'utf-8' });
         console.log('Overwrote characters data');
     },
     /**

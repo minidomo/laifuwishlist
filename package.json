@@ -6,7 +6,7 @@
   "scripts": {
     "start:dev": "node -r dotenv/config ./src/index.js",
     "start:prod": "node -r dotenv/config ./src/index.js --production",
-    "lint": "eslint ./src/index.js",
+    "lint": "eslint ./src/**",
     "clean:logs": "del /S /Q .\\logs\\*.log"
   },
   "author": "",
@@ -16,6 +16,7 @@
     "discord.js": "^13.1.0",
     "dotenv": "^10.0.0",
     "jsonpack": "^1.1.5",
+    "laifu-util": "github:minidomo/laifu-util",
     "winston": "^3.3.3"
   },
   "devDependencies": {
