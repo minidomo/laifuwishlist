@@ -53,6 +53,19 @@ const config = require('../config.json');
  */
 
 /**
+ * @param {Character} character
+ * @returns {boolean}
+ */
+const assertValidCharacter = character => {
+    const validGid = typeof character.gid === 'number';
+    const validName = typeof character.name === 'string';
+    const validSeriesEng = typeof character.series?.eng === 'string';
+    const validSeriesJp = typeof character.series?.jp === 'string';
+    const validSeriesSid = typeof character.series?.sid === 'number';
+    return validGid && validName && validSeriesEng && validSeriesJp && validSeriesSid;
+};
+
+/**
  * @type {Database}
  */
 const database = (() => {
@@ -100,6 +113,10 @@ module.exports = {
      * @param {Character} character
      */
     add(character) {
+        if (!assertValidCharacter(character)) {
+            console.log(character);
+            return;
+        }
         this.remove(character);
         const copy = {
             gid: character.gid,
@@ -125,6 +142,10 @@ module.exports = {
      * @param {Character} character
      */
     remove(character) {
+        if (!assertValidCharacter(character)) {
+            console.log(character);
+            return;
+        }
         const copy = {
             gid: character.gid,
             name: character.name.trim(),
