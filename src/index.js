@@ -7,6 +7,9 @@ const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Disc
 
 const Laifu = require('laifu-util');
 const database = require('./database');
+const commands = require('./commands');
+
+commands.init(client);
 
 /**
  * @param {Discord.Message} message
@@ -33,35 +36,10 @@ const laifuFunction = message => {
     }
 };
 
-/**
- *
- * @param {Discord.Message} message
- */
-const commandHandler = async message => {
-    const mention = `<@!${client.user.id}>`;
-    if (message.content.startsWith(mention)) {
-        const trimmed = message.content.substring(mention.length).trim().toLowerCase();
-        switch (trimmed) {
-            case 'current': {
-                const msg = `Currently have data on ${database.characterCount()}`
-                    + ` characters and ${database.seriesCount()} series`;
-                await message.reply(msg);
-                break;
-            }
-            case 'save': {
-                database.export();
-                const msg = 'Saving current data';
-                await message.reply(msg);
-                break;
-            }
-        }
-    }
-};
-
 client.on('messageCreate', async message => {
     if (!client.application?.owner) await client.application?.fetch();
 
-    commandHandler(message);
+    commands.handler(message);
     Laifu.Util.hasLaifuEmbed(message, { loaded: false, duplicates: false })
         .then(laifuFunction);
 });

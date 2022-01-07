@@ -218,4 +218,16 @@ module.exports = {
     seriesCount() {
         return database.series.size;
     },
+    /**
+     * @returns {Character[]}
+     */
+    characters() {
+        const ret = [];
+        const it = database.characters.values();
+        for (let cur = it.next(); !cur.done; cur = it.next()) {
+            const deepClone = JSON.parse(JSON.stringify(cur.value));
+            ret.push(deepClone);
+        }
+        return ret;
+    },
 };

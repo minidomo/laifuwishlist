@@ -4,5 +4,10 @@
     },
     "logs": {
         "dir": "./logs"
+    },
+    "temp":{
+        "data":{
+            "dir": "./temp/data"
+        }
     }
 }
