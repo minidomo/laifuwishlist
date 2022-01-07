@@ -39,10 +39,9 @@ module.exports = {
                     break;
                 }
                 case 'gids': {
-                    const gids = database.characters().map(val => val.gid);
-                    const filename = `gids-${dayjs().format('MMDDHHmmss')}.txt`;
+                    const filename = `gids-${dayjs().format('MMDDHHmmss')}.data`;
                     const path = `${config.temp.data.dir}/${filename}`;
-                    const content = gids.join('\n');
+                    const content = database.gids().join('\n');
                     if (!fs.existsSync(config.temp.data.dir)) {
                         fs.mkdirSync(config.temp.data.dir, { recursive: true });
                     }
@@ -56,6 +55,7 @@ module.exports = {
                             },
                         ],
                     });
+                    fs.unlinkSync(path);
                     break;
                 }
             }

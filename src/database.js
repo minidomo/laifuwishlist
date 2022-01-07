@@ -230,4 +230,14 @@ module.exports = {
         }
         return ret;
     },
+    /**
+     * @returns {number[]}
+     */
+    gids() {
+        const ret = [];
+        const it = database.characters.keys();
+        for (let cur = it.next(); !cur.done; cur = it.next())
+            ret.push(cur.value);
+        return ret;
+    },
 };
