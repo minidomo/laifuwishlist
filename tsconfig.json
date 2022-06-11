@@ -1,0 +1,38 @@
+{
+  "include": [
+    "src/**/*"
+  ],
+  "compilerOptions": {
+    // Type Checking
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    // if below is true: conflicts with discord-api-types
+    "exactOptionalPropertyTypes": false,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strict": true,
+    // Modules
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    // Emit
+    "declaration": true,
+    "importsNotUsedAsValues": "error",
+    "inlineSources": true,
+    "newLine": "lf",
+    "outDir": "dist",
+    "preserveConstEnums": true,
+    "removeComments": false,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    // Language and Environment
+    "lib": [
+      "ESNext"
+    ],
+    "target": "es2022"
+  }
+}

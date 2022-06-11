@@ -1,0 +1,12 @@
+{
+    "dev": {
+        "token": "",
+        "clientId": "",
+        "guildIds": []
+    },
+    "prod": {
+        "token": "",
+        "clientId": "",
+        "guildIds": []
+    }
+}
