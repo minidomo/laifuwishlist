@@ -1,8 +1,8 @@
 import { Client, Intents } from 'discord.js';
-import { isInfoEmbed, isLaifuBot } from 'laifutil';
+import { InfoEmbed, isInfoEmbed, isLaifuBot } from 'laifutil';
+import * as CharacterDatabase from './CharacterDatabase';
 import { commands } from './commands';
 import { token } from './config';
-import { embeds } from './embed-storage';
 import { logger } from './logger';
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] }) as Client<true>;
@@ -16,17 +16,17 @@ client.on('messageCreate', message => {
         const embed = message.embeds[0];
 
         if (isInfoEmbed(embed)) {
-            embeds.push(embed.toJSON());
+            CharacterDatabase.update(new InfoEmbed(embed));
         }
     }
 });
 
 client.on('interactionCreate', interaction => {
-    if (!interaction.isCommand()) return;
-
-    const command = commands.get(interaction.commandName);
-    if (command) {
-        command.execute(interaction);
+    if (interaction.isCommand()) {
+        const command = commands.get(interaction.commandName);
+        if (command) {
+            command.execute(interaction);
+        }
     }
 });
 

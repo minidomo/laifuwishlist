@@ -21,7 +21,7 @@
     "dayjs": "^1.11.3",
     "discord-api-types": "^0.33.5",
     "discord.js": "^13.8.0",
-    "laifutil": "^1.0.0",
+    "laifutil": "^1.1.0",
     "winston": "^3.7.2"
   },
   "devDependencies": {
@@ -30,7 +30,6 @@
     "eslint": "^8.17.0",
     "eslint-plugin-import": "^2.26.0",
     "rimraf": "^3.0.2",
-    "typedoc": "^0.22.17",
     "typescript": "^4.7.3"
   }
 }
