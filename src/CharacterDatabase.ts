@@ -2,65 +2,34 @@ import { writeFile, readFile, unlink, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { setInterval } from 'node:timers';
 import dayjs from 'dayjs';
-import type { InfoEmbed } from 'laifutil';
+import type {
+    Bounds,
+    CharacterImageInfo,
+    CharacterRarityInfoCollection,
+    CharacterSeriesInfo,
+    InfoEmbed,
+} from 'laifutil';
 import { logger } from './logger';
 
 export interface CharacterEntry {
     lastUpdated: number;
-    image: {
-        currentNumber: number;
-        uploader: string;
-        credit: string;
-    };
+    image: CharacterImageInfo;
     characterName: string;
     globalId: number;
     totalImages: number;
-    series: {
-        englishTitle: string;
-        alternateTitle: string;
-        id: number;
-        sequence: string;
-    };
+    series: CharacterSeriesInfo;
     influence: number;
-    influenceRankRange: {
-        lower: number;
-        upper: number;
-    };
-    rarities: {
-        alpha: {
-            existingAmount: number;
-            totalClaimed: number;
-        };
-        beta: {
-            existingAmount: number;
-            totalClaimed: number;
-        };
-        gamma: {
-            existingAmount: number;
-            totalClaimed: number;
-        };
-        delta: {
-            existingAmount: number;
-            totalClaimed: number;
-        };
-        epsilon: {
-            existingAmount: number;
-            totalClaimed: number;
-        };
-        zeta: {
-            existingAmount: number;
-            totalClaimed: number;
-        };
-        ultra: {
-            existingAmount: number;
-            totalClaimed: number;
-        };
-    };
+    influenceRankRange: Bounds;
+    rarities: CharacterRarityInfoCollection;
 }
 
 export interface BackupMetadata {
     filename: string;
     dateCreated: number;
+}
+
+export interface QueryOptions {
+    globalId?: number;
 }
 
 export type GlobalId = number;
@@ -72,7 +41,7 @@ const BACKUP_FILE_REGEX = /(\d+)-characters\.data/;
 const MAX_BACKUPS = 5;
 const backups: BackupMetadata[] = [];
 
-// 10 minutes in milliseconds
+// 20 minutes in milliseconds
 const interval = 1000 * 60 * 20;
 
 (async () => {
@@ -177,4 +146,12 @@ export async function exportData(): Promise<boolean> {
 
         return false;
     }
+}
+
+export function query(options: QueryOptions): CharacterEntry | null {
+    if (options.globalId) {
+        return storage.get(options.globalId) ?? null;
+    }
+
+    return null;
 }

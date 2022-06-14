@@ -35,7 +35,7 @@ function generateButtons(count: number): MessageButton[] {
 
 export const data = new SlashCommandBuilder()
     .setName('backup')
-    .setDescription('Switch the database to a backup.');
+    .setDescription('Switch the database to a backup');
 
 export async function execute(interaction: CommandInteraction) {
     const backups = CharacterDatabase.getBackups();
