@@ -2,8 +2,9 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import dayjs from 'dayjs';
 import calender from 'dayjs/plugin/calendar';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
-import { CharacterRarityInfo, RarityConstants } from 'laifutil';
-import * as CharacterDatabase from '../CharacterDatabase';
+import { Bounds, CharacterRarityInfo, RarityConstants } from 'laifutil';
+import { character } from '../database';
+import type { CharacterEntry } from '../structures';
 
 dayjs.extend(calender);
 
@@ -21,8 +22,8 @@ export async function execute(interaction: CommandInteraction) {
 
     const globalId = options.getInteger('global_id');
     if (globalId) {
-        const character = CharacterDatabase.query({ globalId });
-        const embed = makeCharacterEmbed(character);
+        const characterInfo = character.query({ globalId });
+        const embed = makeCharacterEmbed(characterInfo);
 
         await interaction.reply({
             embeds: [embed],
@@ -36,41 +37,49 @@ export async function execute(interaction: CommandInteraction) {
 }
 
 function getRarityString(rarity: CharacterRarityInfo): string {
-    const burnRate = rarity.existingAmount / rarity.totalClaimed * 100;
+    const burnRate = (rarity.totalClaimed - rarity.existingAmount) / rarity.totalClaimed * 100;
     return `${rarity.existingAmount}・${rarity.totalClaimed} \`(${burnRate.toFixed(0)}%)\``;
 }
 
-function makeCharacterEmbed(character: CharacterDatabase.CharacterEntry | null) {
+function getRankString(range: Bounds): string {
+    const lower = Math.min(range.lower, range.upper);
+    const upper = Math.max(range.lower, range.upper);
+    return `${lower}・${upper}`;
+}
+
+function makeCharacterEmbed(characterInfo: CharacterEntry | null) {
     const embed = new MessageEmbed();
 
-    if (character === null) {
+    if (characterInfo === null) {
         embed.setDescription('Could not find character');
     } else {
+        const lastUpdated = dayjs.unix(characterInfo.lastUpdated).format('MM/DD/YYYY, h:mm:ss A');
+
         embed
-            .setTitle(character.characterName)
+            .setTitle(characterInfo.characterName)
             .addField('General',
-                `**Global ID:** ${character.globalId}\n` +
-                `**Total Images:** ${character.totalImages}\n` +
-                `**Influence:** ${character.influence}\n` +
-                `**Rank:** ${character.influenceRankRange.lower}・${character.influenceRankRange.upper}\n`,
+                `**Global ID:** ${characterInfo.globalId}\n` +
+                `**Total Images:** ${characterInfo.totalImages}\n` +
+                `**Influence:** ${characterInfo.influence}\n` +
+                `**Rank:** ${getRankString(characterInfo.influenceRankRange)}\n`,
                 true)
-            .addField('Rarity Keep Rate',
-                `**${RarityConstants.ALPHA.symbol}** ${getRarityString(character.rarities.alpha)}\n` +
-                `**${RarityConstants.BETA.symbol}** ${getRarityString(character.rarities.beta)}\n` +
-                `**${RarityConstants.GAMMA.symbol}** ${getRarityString(character.rarities.gamma)}\n` +
-                `**${RarityConstants.DELTA.symbol}** ${getRarityString(character.rarities.delta)}\n` +
-                `**${RarityConstants.EPSILON.symbol}** ${getRarityString(character.rarities.epsilon)}\n` +
-                `**${RarityConstants.ZETA.symbol}** ${getRarityString(character.rarities.zeta)}\n` +
-                `**${RarityConstants.ULTRA.symbol}** ${getRarityString(character.rarities.ultra)}\n`,
+            .addField('Rarity Burn Rate',
+                `**${RarityConstants.ALPHA.symbol}** ${getRarityString(characterInfo.rarities.alpha)}\n` +
+                `**${RarityConstants.BETA.symbol}** ${getRarityString(characterInfo.rarities.beta)}\n` +
+                `**${RarityConstants.GAMMA.symbol}** ${getRarityString(characterInfo.rarities.gamma)}\n` +
+                `**${RarityConstants.DELTA.symbol}** ${getRarityString(characterInfo.rarities.delta)}\n` +
+                `**${RarityConstants.EPSILON.symbol}** ${getRarityString(characterInfo.rarities.epsilon)}\n` +
+                `**${RarityConstants.ZETA.symbol}** ${getRarityString(characterInfo.rarities.zeta)}\n` +
+                `**${RarityConstants.ULTRA.symbol}** ${getRarityString(characterInfo.rarities.ultra)}\n`,
                 true)
             .addField('Series',
-                `**ENG:** ${character.series.englishTitle}\n` +
-                `**ALT:** ${character.series.alternateTitle}\n` +
-                `**Series ID:** ${character.series.id}\n` +
-                `**Sequence:** \`${character.series.sequence}\``,
+                `**ENG:** ${characterInfo.series.englishTitle}\n` +
+                `**ALT:** ${characterInfo.series.alternateTitle}\n` +
+                `**Series ID:** ${characterInfo.series.id}\n` +
+                `**Sequence:** \`${characterInfo.series.sequence}\``,
                 false)
             .setFooter({
-                text: `Last Updated ${dayjs.unix(character.lastUpdated).calendar(dayjs())}`,
+                text: `Last Updated: ${lastUpdated}`,
             });
     }
 

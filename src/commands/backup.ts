@@ -7,10 +7,15 @@ import {
     MessageEmbed,
     TextBasedChannel,
 } from 'discord.js';
-import * as CharacterDatabase from '../CharacterDatabase';
+import { character, wishlist } from '../database';
+import { logger } from '../logger';
+import type { CharacterDatabase, DatabaseType, WishlistDatabase } from '../structures';
+import type { BackupMetadata } from '../types';
 import { getLabel } from '../util';
 
-function generateDescription(backups: CharacterDatabase.BackupMetadata[]): string {
+const maxResponseTime = 5000;
+
+function generateDescription(backups: BackupMetadata[]): string {
     let ret = 'Select a backup to import\n\n';
 
     ret += backups
@@ -34,15 +39,40 @@ function generateButtons(count: number): MessageButton[] {
 }
 
 export const data = new SlashCommandBuilder()
+    .addStringOption(option =>
+        option
+            .setChoices(
+                {
+                    name: 'Wishlist',
+                    value: 'wishlist',
+                },
+                {
+                    name: 'Character',
+                    value: 'character',
+                },
+            )
+            .setName('database')
+            .setDescription('The type of database')
+            .setRequired(true))
     .setName('backup')
     .setDescription('Switch the database to a backup');
 
 export async function execute(interaction: CommandInteraction) {
-    const backups = CharacterDatabase.getBackups();
+    const { options } = interaction;
+
+    const databaseType = options.getString('database') as DatabaseType;
+    let database: WishlistDatabase | CharacterDatabase;
+
+    if (databaseType === 'character') {
+        database = character;
+    } else {
+        database = wishlist;
+    }
+
+    const backups = database.getBackups();
 
     const embed = new MessageEmbed()
-        .setTitle('Available Backups')
-        .setColor('BLURPLE');
+        .setTitle(`Available Backups: ${databaseType[0].toUpperCase()}${databaseType.substring(1)}`);
 
     if (backups.length > 0) {
         embed.setDescription(generateDescription(backups));
@@ -73,38 +103,41 @@ export async function execute(interaction: CommandInteraction) {
 
 interface Args {
     interaction: CommandInteraction;
-    embed: MessageEmbed,
-    backups: CharacterDatabase.BackupMetadata[],
+    embed: MessageEmbed;
+    backups: BackupMetadata[];
 }
 
 function handleButtons(args: Args) {
     const { interaction, backups, embed } = args;
 
-    const filter = (i: MessageComponentInteraction) =>
-        i.user.id === interaction.user.id && i.customId.startsWith('backup');
+    function filter(i: MessageComponentInteraction): boolean {
+        i.deferUpdate();
+        return i.user.id === interaction.user.id && i.customId.startsWith('backup');
+    }
+
     const channel = interaction.channel as TextBasedChannel;
-    const collector = channel.createMessageComponentCollector({ filter, time: 5000 });
 
-    collector.on('collect', async i => {
-        const label = getLabel(i.customId);
-        const index = parseInt(label) - 1;
-        const backup = backups[index];
+    channel.awaitMessageComponent({ filter, time: maxResponseTime, componentType: 'BUTTON' })
+        .then(async i => {
+            const label = getLabel(i.customId);
+            const index = parseInt(label) - 1;
 
-        const success = await CharacterDatabase.importData(backup.filename);
+            const success = await character.importData(backups[index]);
 
-        let content = '';
+            let content = '';
 
-        if (success) {
-            content = `Successfully switched the database to \`${label}\``;
-        } else {
-            content = `Failed to switch the database to \`${label}\``;
-        }
+            if (success) {
+                content = `Successfully switched the database to \`${label}\``;
+            } else {
+                content = `Failed to switch the database to \`${label}\``;
+            }
 
-        embed.setDescription(`${embed.description}\n\n${content}`);
+            embed.setDescription(`${embed.description}\n\n${content}`);
 
-        await i.update({
-            embeds: [embed],
-            components: [],
-        });
-    });
+            await i.update({
+                embeds: [embed],
+                components: [],
+            });
+        })
+        .catch(logger.error);
 }

@@ -8,8 +8,7 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: CommandInteraction) {
     const embed = new MessageEmbed()
         .setDescription(`Pong ${interaction.user}!`)
-        .setFooter({ text: 'Developed by JB#9224' })
-        .setColor('BLURPLE');
+        .setFooter({ text: 'Developed by JB#9224' });
 
     await interaction.reply({
         embeds: [embed],

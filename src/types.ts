@@ -9,3 +9,9 @@ export interface Command {
 export interface CommandContainer {
     [key: string]: Command;
 }
+
+export interface BackupMetadata {
+    filename: string;
+    dateCreated: number;
+}
+
