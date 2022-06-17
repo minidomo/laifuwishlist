@@ -24,6 +24,7 @@ export type GlobalId = number;
 
 export interface QueryOptions {
     globalId?: number;
+    seriesId?: number;
 }
 
 export class CharacterDatabase extends Database<GlobalId, CharacterEntry> {
@@ -45,6 +46,15 @@ export class CharacterDatabase extends Database<GlobalId, CharacterEntry> {
     query(options: QueryOptions): CharacterEntry | null {
         if (options.globalId) {
             return this.storage.get(options.globalId) ?? null;
+        }
+
+        if (options.seriesId) {
+            const it = this.storage.values();
+            for (let cur = it.next(); !cur.done; cur = it.next()) {
+                if (cur.value.series.id === options.seriesId) {
+                    return cur.value;
+                }
+            }
         }
 
         return null;

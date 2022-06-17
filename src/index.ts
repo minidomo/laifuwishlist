@@ -14,7 +14,7 @@ import {
 import { commands } from './commands';
 import { token } from './config';
 import { character, wishlist } from './database';
-import { logger } from './utils';
+import { CustomId, logger } from './utils';
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] }) as Client<true>;
 
@@ -23,6 +23,8 @@ client.once('ready', () => {
 });
 
 client.on('messageCreate', message => {
+    if (!message.guild) return;
+
     if (isLaifuBot(message) && message.embeds[0]) {
         const embed = message.embeds[0];
 
@@ -40,6 +42,7 @@ client.on('messageCreate', message => {
             }
 
             const userIds = wishlist.search(
+                message.guild.id,
                 characterEmbed.globalId,
                 characterEmbed.series.id,
                 characterEmbed.image.currentNumber,
@@ -58,10 +61,18 @@ client.on('messageCreate', message => {
 });
 
 client.on('interactionCreate', interaction => {
+    if (!interaction.guild) return;
+
     if (interaction.isCommand()) {
         const command = commands.get(interaction.commandName);
         if (command) {
             command.execute(interaction);
+        }
+    } else if (interaction.isModalSubmit()) {
+        const group = CustomId.getGroup(interaction.customId);
+        const command = commands.get(group);
+        if (command && command.handleModal) {
+            command.handleModal(interaction);
         }
     }
 });

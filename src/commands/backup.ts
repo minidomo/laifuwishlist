@@ -86,7 +86,7 @@ export async function execute(interaction: CommandInteraction) {
             components: [row],
         });
 
-        handleButtons({
+        handleResponse({
             interaction,
             backups,
             embed,
@@ -107,12 +107,12 @@ interface Args {
     backups: BackupMetadata[];
 }
 
-function handleButtons(args: Args) {
+function handleResponse(args: Args) {
     const { interaction, backups, embed } = args;
 
     function filter(i: MessageComponentInteraction): boolean {
         i.deferUpdate();
-        return i.user.id === interaction.user.id && i.customId.startsWith('backup');
+        return i.user.id === interaction.user.id && CustomId.getGroup(i.customId) === 'backup';
     }
 
     const channel = interaction.channel as TextBasedChannel;
