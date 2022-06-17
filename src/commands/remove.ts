@@ -13,8 +13,8 @@ import { character, wishlist } from '../database';
 import type { WishlistCharacterInternal } from '../structures';
 import { CustomId } from '../utils';
 
-const seriesCustomId = CustomId.createCustomId('add', 'series');
-const characterCustomId = CustomId.createCustomId('add', 'character');
+const seriesCustomId = CustomId.createCustomId('remove', 'series');
+const characterCustomId = CustomId.createCustomId('remove', 'character');
 
 function parseSeries(str: string): number[] {
     return Array.from(str.matchAll(/\d+/g), e => parseInt(e[0]));
@@ -93,13 +93,13 @@ function characterDescription(characters: WishlistCharacterInternal[]): string {
 }
 
 export const data = new SlashCommandBuilder()
-    .setName('add')
-    .setDescription('Add characters or series to your wishlist');
+    .setName('remove')
+    .setDescription('Remove characters or series from your wishlist');
 
 export async function execute(interaction: CommandInteraction) {
     const modal = new Modal()
-        .setTitle('Add to Wishlist')
-        .setCustomId(CustomId.createCustomId('add', 'modal'));
+        .setTitle('Remove from Wishlist')
+        .setCustomId(CustomId.createCustomId('remove', 'modal'));
 
     const seriesInput = new TextInputComponent()
         .setLabel('Series IDs')
@@ -108,7 +108,7 @@ export async function execute(interaction: CommandInteraction) {
         .setStyle('SHORT');
 
     const characterInput = new TextInputComponent()
-        .setLabel('Global IDs (image numbers are optional)')
+        .setLabel('Global IDs and image numbers (optional)')
         .setCustomId(characterCustomId)
         .setPlaceholder('<gid> <images>\n630 269\n4652')
         .setStyle('PARAGRAPH');
@@ -130,12 +130,12 @@ export async function handleModal(interaction: ModalSubmitInteraction) {
 
     const guild = interaction.guild as Guild;
 
-    series.forEach(seriesId => wishlist.update('add', interaction.user.id, guild.id, seriesId));
-    characters.forEach(e => wishlist.update('add', interaction.user.id, guild.id, e));
+    series.forEach(seriesId => wishlist.update('remove', interaction.user.id, guild.id, seriesId));
+    characters.forEach(e => wishlist.update('remove', interaction.user.id, guild.id, e));
 
     const embed = new MessageEmbed()
-        .setColor(0x7BF1A8)
-        .setTitle('Added to wishlist')
+        .setColor(0xFF5376)
+        .setTitle('Removed from wishlist')
         .addField('Characters', characterDescription(characters))
         .addField('Series', seriesDescription(series));
 

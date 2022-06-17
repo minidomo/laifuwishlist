@@ -14,5 +14,5 @@ guildsIds.forEach(guildId => {
 
     rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commandsJson })
         .then(() => logger.info(`Successfully reloaded application (/) commands: ${guildId}`))
-        .catch(logger.error);
+        .catch(console.error);
 });

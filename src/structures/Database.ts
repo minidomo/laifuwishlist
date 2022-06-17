@@ -74,7 +74,7 @@ export abstract class Database<K extends DatabaseKey, V> {
             return true;
         } catch (err) {
             logger.error(`Failed to import ${this.databaseType} database`);
-            logger.error(err);
+            console.error(err);
 
             return false;
         }
@@ -102,7 +102,7 @@ export abstract class Database<K extends DatabaseKey, V> {
             return true;
         } catch (err) {
             logger.error(`Failed to export ${this.databaseType} database`);
-            logger.error(err);
+            console.error(err);
 
             return false;
         }

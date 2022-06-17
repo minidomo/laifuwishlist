@@ -1,3 +1,4 @@
+import stringify from 'fast-json-stable-stringify';
 import { Database, DatabaseType } from './Database';
 
 export interface WishlistEntry {
@@ -25,6 +26,8 @@ export interface WishlistCharacterInternal {
 }
 
 export type UserId = string;
+
+export type Modification = 'add' | 'remove';
 
 function interalize(entry: WishlistEntry): WishlistEntryInternal {
     const ret: WishlistEntryInternal = {
@@ -78,6 +81,16 @@ function addCharacter(map: Map<number, WishlistCharacterInternal>, character: Wi
     character.images.forEach(e => (entry as WishlistCharacterInternal).images.add(e));
 }
 
+function removeCharacter(map: Map<number, WishlistCharacterInternal>, character: WishlistCharacterInternal) {
+    const entry = map.get(character.globalId);
+    if (entry) {
+        character.images.forEach(e => entry.images.delete(e));
+        if (entry.images.size === 0) {
+            map.delete(character.globalId);
+        }
+    }
+}
+
 export class WishlistDatabase extends Database<UserId, WishlistEntryInternal> {
     protected fileRegex = /(\d+)-wishlist\.data/;
     protected exportInterval: number = 1000 * 60 * 20;
@@ -91,10 +104,10 @@ export class WishlistDatabase extends Database<UserId, WishlistEntryInternal> {
     protected toString(): string {
         const arr: WishlistEntry[] = [];
         this.storage.forEach(entry => arr.push(uninteralize(entry)));
-        return JSON.stringify(arr);
+        return stringify(arr);
     }
 
-    update(userId: string, guildId: string, data: WishlistCharacterInternal | number) {
+    update(modification: Modification, userId: string, guildId: string, data: WishlistCharacterInternal | number) {
         let entry = this.storage.get(userId);
 
         if (!entry) {
@@ -110,10 +123,16 @@ export class WishlistDatabase extends Database<UserId, WishlistEntryInternal> {
 
         entry.guildIds.add(guildId);
 
-        if (typeof data === 'number') {
-            entry.seriesIds.add(data);
+        if (modification === 'add') {
+            if (typeof data === 'number') {
+                entry.seriesIds.add(data);
+            } else {
+                addCharacter(entry.globalIds, data);
+            }
+        } else if (typeof data === 'number') {
+            entry.seriesIds.delete(data);
         } else {
-            addCharacter(entry.globalIds, data);
+            removeCharacter(entry.globalIds, data);
         }
     }
 

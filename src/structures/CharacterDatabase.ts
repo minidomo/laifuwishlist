@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import stringify from 'fast-json-stable-stringify';
 import type {
     Bounds,
     CharacterImageInfo,
@@ -40,7 +41,7 @@ export class CharacterDatabase extends Database<GlobalId, CharacterEntry> {
     protected toString(): string {
         const arr: CharacterEntry[] = [];
         this.storage.forEach(entry => arr.push(entry));
-        return JSON.stringify(arr, null, 0);
+        return stringify(arr);
     }
 
     query(options: QueryOptions): CharacterEntry | null {

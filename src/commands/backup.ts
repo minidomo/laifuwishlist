@@ -9,7 +9,7 @@ import {
 } from 'discord.js';
 import { character, wishlist } from '../database';
 import type { BackupMetadata, CharacterDatabase, DatabaseType, WishlistDatabase } from '../structures';
-import { CustomId, logger } from '../utils';
+import { CustomId } from '../utils';
 
 const maxResponseTime = 5000;
 
@@ -72,6 +72,7 @@ export async function execute(interaction: CommandInteraction) {
     const backups = database.getBackups();
 
     const embed = new MessageEmbed()
+        .setColor(0xFFEF9F)
         .setTitle(`Available Backups: ${databaseType[0].toUpperCase()}${databaseType.substring(1)}`);
 
     if (backups.length > 0) {
@@ -139,6 +140,5 @@ function handleResponse(args: Args) {
                 embeds: [embed],
                 components: [],
             });
-        })
-        .catch(logger.error);
+        });
 }
