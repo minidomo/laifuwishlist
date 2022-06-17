@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import type { CommandInteraction } from 'discord.js';
+import { ownerClientId } from '../config';
 import { character, wishlist } from '../database';
 import type { CharacterDatabase, DatabaseType, WishlistDatabase } from '../structures';
 
@@ -49,3 +50,7 @@ export async function execute(interaction: CommandInteraction) {
     });
 }
 
+export function isPermitted(interaction: CommandInteraction): boolean {
+    const { user } = interaction;
+    return user.id === ownerClientId;
+}

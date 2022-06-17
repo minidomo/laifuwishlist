@@ -8,5 +8,8 @@
         "token": "",
         "clientId": "",
         "guildIds": []
+    },
+    "owner": {
+        "clientId": ""
     }
 }

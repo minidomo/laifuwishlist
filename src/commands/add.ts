@@ -121,6 +121,10 @@ export async function execute(interaction: CommandInteraction) {
     await interaction.showModal(modal);
 }
 
+export function isPermitted(_interaction: CommandInteraction): boolean {
+    return true;
+}
+
 export async function handleModal(interaction: ModalSubmitInteraction) {
     const seriesString = interaction.fields.getTextInputValue(seriesCustomId);
     const charactersString = interaction.fields.getTextInputValue(characterCustomId);

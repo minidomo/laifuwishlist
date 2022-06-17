@@ -12,3 +12,5 @@ export const token: string = production ? config.prod.token : config.dev.token;
 export const guildsIds: string[] = production ? config.prod.guildIds : config.dev.guildIds;
 
 export const clientId: string = production ? config.prod.clientId : config.dev.clientId;
+
+export const ownerClientId: string = config.owner.clientId;

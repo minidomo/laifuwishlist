@@ -65,7 +65,7 @@ client.on('interactionCreate', interaction => {
 
     if (interaction.isCommand()) {
         const command = commands.get(interaction.commandName);
-        if (command) {
+        if (command && command.isPermitted(interaction)) {
             command.execute(interaction);
         }
     } else if (interaction.isModalSubmit()) {

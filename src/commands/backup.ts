@@ -7,9 +7,10 @@ import {
     MessageEmbed,
     TextBasedChannel,
 } from 'discord.js';
+import { ownerClientId } from '../config';
 import { character, wishlist } from '../database';
 import type { BackupMetadata, CharacterDatabase, DatabaseType, WishlistDatabase } from '../structures';
-import { CustomId } from '../utils';
+import { CustomId, logger } from '../utils';
 
 const maxResponseTime = 5000;
 
@@ -102,6 +103,11 @@ export async function execute(interaction: CommandInteraction) {
     }
 }
 
+export function isPermitted(interaction: CommandInteraction): boolean {
+    const { user } = interaction;
+    return user.id === ownerClientId;
+}
+
 interface Args {
     interaction: CommandInteraction;
     embed: MessageEmbed;
@@ -140,5 +146,6 @@ function handleResponse(args: Args) {
                 embeds: [embed],
                 components: [],
             });
-        });
+        })
+        .catch(_err => logger.info('No response received from backup buttons within given time'));
 }

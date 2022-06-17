@@ -4,6 +4,7 @@ import type { CommandInteraction, ModalSubmitInteraction } from 'discord.js';
 export interface Command {
     data: SlashCommandBuilder;
     execute: (interaction: CommandInteraction) => Promise<void>;
+    isPermitted: (interaction: CommandInteraction) => boolean;
     handleModal?: (interaction: ModalSubmitInteraction) => Promise<void>;
 }
 

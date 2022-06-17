@@ -36,6 +36,10 @@ export async function execute(interaction: CommandInteraction) {
     }
 }
 
+export function isPermitted(_interaction: CommandInteraction): boolean {
+    return true;
+}
+
 function getRarityString(rarity: CharacterRarityInfo): string {
     const burnRate = (rarity.totalClaimed - rarity.existingAmount) / rarity.totalClaimed * 100;
     return `${rarity.existingAmount}・${rarity.totalClaimed} \`(${burnRate.toFixed(0)}%)\``;
