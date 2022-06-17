@@ -8,10 +8,8 @@ import {
     TextBasedChannel,
 } from 'discord.js';
 import { character, wishlist } from '../database';
-import { logger } from '../logger';
-import type { CharacterDatabase, DatabaseType, WishlistDatabase } from '../structures';
-import type { BackupMetadata } from '../types';
-import { getLabel } from '../util';
+import type { BackupMetadata, CharacterDatabase, DatabaseType, WishlistDatabase } from '../structures';
+import { CustomId, logger } from '../utils';
 
 const maxResponseTime = 5000;
 
@@ -22,6 +20,8 @@ function generateDescription(backups: BackupMetadata[]): string {
         .map((e, index) => `\`${index + 1}\` ${time(e.dateCreated)}`)
         .join('\n');
 
+    ret += '\n\nRespond within 5 seconds';
+
     return ret;
 }
 
@@ -30,7 +30,7 @@ function generateButtons(count: number): MessageButton[] {
 
     for (let i = 1; i <= count; i++) {
         arr.push(new MessageButton()
-            .setCustomId(`backup-${i}`)
+            .setCustomId(CustomId.createCustomId('backup', `${i}`))
             .setLabel(`${i}`)
             .setStyle('PRIMARY'));
     }
@@ -119,7 +119,7 @@ function handleButtons(args: Args) {
 
     channel.awaitMessageComponent({ filter, time: maxResponseTime, componentType: 'BUTTON' })
         .then(async i => {
-            const label = getLabel(i.customId);
+            const label = CustomId.getId(i.customId);
             const index = parseInt(label) - 1;
 
             const success = await character.importData(backups[index]);
@@ -132,7 +132,8 @@ function handleButtons(args: Args) {
                 content = `Failed to switch the database to \`${label}\``;
             }
 
-            embed.setDescription(`${embed.description}\n\n${content}`);
+            const newDescription = embed.description?.replace('Respond within 5 seconds', content) as string;
+            embed.setDescription(newDescription);
 
             await i.update({
                 embeds: [embed],

@@ -14,7 +14,7 @@ import {
 import { commands } from './commands';
 import { token } from './config';
 import { character, wishlist } from './database';
-import { logger } from './logger';
+import { logger } from './utils';
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] }) as Client<true>;
 

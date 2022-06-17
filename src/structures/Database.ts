@@ -2,8 +2,8 @@ import { readdir, readFile, writeFile, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { setInterval } from 'node:timers';
 import dayjs from 'dayjs';
-import { logger } from '../logger';
-import type { BackupMetadata } from '../types';
+import type { BackupMetadata } from './types';
+import { logger } from '../utils';
 
 export type DatabaseKey = string | number;
 export type DatabaseType = 'wishlist' | 'character';
