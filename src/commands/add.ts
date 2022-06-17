@@ -59,12 +59,12 @@ function seriesDescription(series: number[]): string {
     series.forEach(id => {
         const res = character.query({ seriesId: id });
 
-        let title = '*UNKNOWN TITLE*';
+        let title = '*MISSING INFO*';
         if (res) {
             title = res.series.englishTitle;
         }
 
-        ret += `${title} \`[${id}]\`\n`;
+        ret += `${title} \`${id}\`\n`;
     });
 
     return ret;
@@ -80,13 +80,20 @@ function characterDescription(characters: WishlistCharacterInternal[]): string {
     characters.forEach(e => {
         const res = character.query({ globalId: e.globalId });
 
-        let name = '*UNKNOWN NAME*';
+        let name = '*MISSING INFO*';
         if (res) {
             name = cleanCharacterName(res.characterName);
         }
 
-        const ids = Array.from(e.images.values()).join('');
-        ret += `${name} \`[${e.globalId} ${ids}]\`\n`;
+        const ids = Array.from(e.images.values()).sort().join('');
+        const all = ids === '123456789';
+
+        let idsText = ` ${ids}`;
+        if (all) {
+            idsText = '';
+        }
+
+        ret += `${name} \`${e.globalId}${idsText}\`\n`;
     });
 
     return ret;

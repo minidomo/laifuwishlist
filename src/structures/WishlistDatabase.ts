@@ -107,6 +107,10 @@ export class WishlistDatabase extends Database<UserId, WishlistEntryInternal> {
         return stringify(arr);
     }
 
+    getUserInfo(userId: string): WishlistEntryInternal | null {
+        return this.storage.get(userId) ?? null;
+    }
+
     update(modification: Modification, userId: string, guildId: string, data: WishlistCharacterInternal | number) {
         let entry = this.storage.get(userId);
 
