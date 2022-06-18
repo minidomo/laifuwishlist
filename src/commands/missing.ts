@@ -2,7 +2,37 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
 import { character } from '../database';
 
-function generateDescription(maxId: number): string {
+export const data = new SlashCommandBuilder()
+    .addIntegerOption(option =>
+        option
+            .setRequired(true)
+            .setMinValue(0)
+            .setMaxValue(30000)
+            .setName('max_global_id')
+            .setDescription('The largest global ID to consider'))
+    .setName('missing')
+    .setDescription('Shows the global IDs that are missing in the database');
+
+export async function execute(interaction: CommandInteraction) {
+    const { options } = interaction;
+
+    const maxId = options.getInteger('max_global_id', true);
+
+    const embed = new MessageEmbed()
+        .setColor(0xED6A5A)
+        .setTitle('Missing Information')
+        .setDescription(createDescription(maxId));
+
+    await interaction.reply({
+        embeds: [embed],
+    });
+}
+
+export function isPermitted(_interaction: CommandInteraction): boolean {
+    return true;
+}
+
+function createDescription(maxId: number): string {
     const ids: string[] = [];
     let consecutive = 0;
 
@@ -24,34 +54,4 @@ function generateDescription(maxId: number): string {
     }
 
     return ids.join(', ');
-}
-
-export const data = new SlashCommandBuilder()
-    .addIntegerOption(option =>
-        option
-            .setRequired(true)
-            .setMinValue(0)
-            .setMaxValue(30000)
-            .setName('max_global_id')
-            .setDescription('The largest global ID to consider'))
-    .setName('missing')
-    .setDescription('Shows the global IDs that are missing in the database');
-
-export async function execute(interaction: CommandInteraction) {
-    const { options } = interaction;
-
-    const maxId = options.getInteger('max_global_id', true);
-
-    const embed = new MessageEmbed()
-        .setColor(0xED6A5A)
-        .setTitle('Missing Information')
-        .setDescription(generateDescription(maxId));
-
-    await interaction.reply({
-        embeds: [embed],
-    });
-}
-
-export function isPermitted(_interaction: CommandInteraction): boolean {
-    return true;
 }
