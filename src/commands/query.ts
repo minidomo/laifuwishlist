@@ -21,9 +21,10 @@ export async function execute(interaction: CommandInteraction) {
     const { options } = interaction;
 
     const globalId = options.getInteger('global_id');
-    if (globalId) {
+    if (typeof globalId === 'number') {
         const characterInfo = character.query({ globalId });
-        const embed = makeCharacterEmbed(characterInfo);
+        const embed = makeCharacterEmbed(characterInfo)
+            .setColor(0xF0B67F);
 
         await interaction.reply({
             embeds: [embed],
@@ -41,7 +42,10 @@ export function isPermitted(_interaction: CommandInteraction): boolean {
 }
 
 function getRarityString(rarity: CharacterRarityInfo): string {
-    const burnRate = (rarity.totalClaimed - rarity.existingAmount) / rarity.totalClaimed * 100;
+    let burnRate = (rarity.totalClaimed - rarity.existingAmount) / rarity.totalClaimed * 100;
+    if (rarity.totalClaimed === 0) {
+        burnRate = 0;
+    }
     return `${rarity.existingAmount}・${rarity.totalClaimed} \`(${burnRate.toFixed(0)}%)\``;
 }
 

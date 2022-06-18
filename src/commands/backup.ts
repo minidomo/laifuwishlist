@@ -10,9 +10,9 @@ import {
 import { ownerClientId } from '../config';
 import { character, wishlist } from '../database';
 import type { BackupMetadata, CharacterDatabase, DatabaseType, WishlistDatabase } from '../structures';
-import { CustomId, logger } from '../utils';
+import { CustomId } from '../utils';
 
-const maxResponseTime = 5000;
+const MAX_RESPONSE_TIME = 5000;
 
 function generateDescription(backups: BackupMetadata[]): string {
     let ret = 'Select a backup to import\n\n';
@@ -92,6 +92,7 @@ export async function execute(interaction: CommandInteraction) {
             interaction,
             backups,
             embed,
+            buttons,
         });
     } else {
         embed.setDescription('No backups available.');
@@ -112,19 +113,23 @@ interface Args {
     interaction: CommandInteraction;
     embed: MessageEmbed;
     backups: BackupMetadata[];
+    buttons: MessageButton[];
 }
 
 function handleResponse(args: Args) {
-    const { interaction, backups, embed } = args;
+    const { interaction, backups, embed, buttons } = args;
 
     function filter(i: MessageComponentInteraction): boolean {
         i.deferUpdate();
         return i.user.id === interaction.user.id && CustomId.getGroup(i.customId) === 'backup';
     }
 
+    const row = new MessageActionRow().addComponents(buttons);
+    buttons.forEach(button => button.setDisabled(true));
+
     const channel = interaction.channel as TextBasedChannel;
 
-    channel.awaitMessageComponent({ filter, time: maxResponseTime, componentType: 'BUTTON' })
+    channel.awaitMessageComponent({ filter, time: MAX_RESPONSE_TIME, componentType: 'BUTTON' })
         .then(async i => {
             const label = CustomId.getId(i.customId);
             const index = parseInt(label) - 1;
@@ -144,8 +149,10 @@ function handleResponse(args: Args) {
 
             await i.update({
                 embeds: [embed],
-                components: [],
+                components: [row],
             });
         })
-        .catch(_err => logger.info('No response received from backup buttons within given time'));
+        .catch(async () => {
+            await interaction.editReply({ embeds: [embed], components: [row] });
+        });
 }
