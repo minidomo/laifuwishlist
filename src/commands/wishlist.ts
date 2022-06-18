@@ -1,5 +1,12 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+import {
+    CommandInteraction,
+    MessageActionRow,
+    MessageButton,
+    MessageComponentInteraction,
+    MessageEmbed,
+    TextChannel,
+} from 'discord.js';
 import { Bounds, cleanCharacterName } from 'laifutil';
 import { character, wishlist } from '../database';
 import type { CharacterEntry, WishlistCharacterInternal, WishlistEntryInternal } from '../structures';
@@ -9,11 +16,17 @@ interface CharacterDescriptionInfo {
     basic: WishlistCharacterInternal;
     character: CharacterEntry | null;
 }
+interface SeriesDescriptionInfo {
+    id: number;
+    englishTitle: string | null;
+}
 
+type Label = 'prev' | 'next';
 type Category = 'series' | 'characters';
 const MAX_PER_PAGE = 20;
+const MAX_IDLE_TIME = 10000;
 
-function getMaxPages(size: number): number {
+function getLastPage(size: number): number {
     if (size === 0) {
         return 1;
     }
@@ -29,14 +42,11 @@ function getPageBounds(page: number, max: number): Bounds {
 
 function generateDescription(category: Category, page: number, entry: WishlistEntryInternal): string {
     if (category === 'characters') {
-        let targetPage = page;
-        const maxPages = getMaxPages(entry.globalIds.size);
-        if (page < 1 || page > maxPages) {
-            targetPage = 1;
-        }
+        const lastPage = getLastPage(entry.globalIds.size);
+        const targetPage = page < 1 || page > lastPage ? 1 : page;
 
-        const data = Array.from(entry.globalIds.values(),
-            e => {
+        const data = Array.from(entry.globalIds.values())
+            .map(e => {
                 const temp: CharacterDescriptionInfo = {
                     basic: e,
                     character: character.query({ globalId: e.globalId }),
@@ -45,14 +55,14 @@ function generateDescription(category: Category, page: number, entry: WishlistEn
                 return temp;
             })
             .sort((a, b) => {
-                const aName = a.character?.characterName;
-                const bName = b.character?.characterName;
+                const aVal = a.character?.characterName;
+                const bVal = b.character?.characterName;
 
-                if (aName && bName) {
-                    return aName < bName ? -1 : 1;
-                } else if (aName) {
+                if (aVal && bVal) {
+                    return aVal < bVal ? -1 : 1;
+                } else if (aVal) {
                     return -1;
-                } else if (bName) {
+                } else if (bVal) {
                     return 1;
                 } else {
                     return a.basic.globalId - b.basic.globalId;
@@ -84,22 +94,109 @@ function generateDescription(category: Category, page: number, entry: WishlistEn
 
         return ret;
     } else {
-        return 'TODO';
+        const lastPage = getLastPage(entry.globalIds.size);
+        const targetPage = page < 1 || page > lastPage ? 1 : page;
+
+        const data = Array.from(entry.seriesIds)
+            .map(id => {
+                const temp: SeriesDescriptionInfo = {
+                    id,
+                    englishTitle: character.query({ seriesId: id })?.series.englishTitle ?? null,
+                };
+
+                return temp;
+            })
+            .sort((a, b) => {
+                const aVal = a.englishTitle;
+                const bVal = b.englishTitle;
+
+                if (aVal && bVal) {
+                    return aVal < bVal ? -1 : 1;
+                } else if (aVal) {
+                    return -1;
+                } else if (bVal) {
+                    return 1;
+                } else {
+                    return a.id - b.id;
+                }
+            });
+
+        const bounds = getPageBounds(targetPage, data.length - 1);
+
+        let ret = '';
+
+        for (let i = bounds.lower; i <= bounds.upper; i++) {
+            const e = data[i];
+            const title = e.englishTitle ?? '*MISSING INFO*';
+            ret += `\`${e.id}\` ${title}\n`;
+        }
+
+        return ret;
     }
 }
 
 function generateFooter(category: Category, page: number, entry: WishlistEntryInternal): string {
-    if (category === 'characters') {
-        let targetPage = page;
-        const maxPages = getMaxPages(entry.globalIds.size);
-        if (page < 1 || page > maxPages) {
-            targetPage = 1;
+    const size = category === 'characters' ? entry.globalIds.size : entry.seriesIds.size;
+    const lastPage = getLastPage(size);
+    const targetPage = page < 1 || page > lastPage ? 1 : page;
+
+    return `Page ${targetPage}/${lastPage}・Total ${size} ${category[0].toUpperCase()}${category.substring(1)}`;
+}
+
+interface Args {
+    interaction: CommandInteraction;
+    row: MessageActionRow;
+    category: Category;
+    entry: WishlistEntryInternal;
+    embed: MessageEmbed,
+}
+
+function handleInteractions(args: Args) {
+    const { interaction, row, category, entry, embed } = args;
+    let curPage = 1;
+
+    const size = category === 'characters' ? entry.globalIds.size : entry.seriesIds.size;
+    const lastPage = getLastPage(size);
+
+    function filter(i: MessageComponentInteraction): boolean {
+        i.deferUpdate();
+        return i.user.id === interaction.user.id && CustomId.getGroup(i.customId) === 'wishlist';
+    }
+
+    const channel = interaction.channel as TextChannel;
+    const collector = channel.createMessageComponentCollector({
+        componentType: 'BUTTON',
+        idle: MAX_IDLE_TIME,
+        filter,
+    });
+
+    collector.on('collect', async i => {
+        const label = CustomId.getId(i.customId) as Label;
+
+        if (label === 'next') {
+            curPage = ((curPage - 1) + 1 + lastPage) % lastPage + 1;
+        } else {
+            curPage = ((curPage - 1) - 1 + lastPage) % lastPage + 1;
         }
 
-        return `Page ${targetPage}/${maxPages}・Total ${entry.globalIds.size} Characters`;
-    } else {
-        return 'TODO';
-    }
+        embed
+            .setDescription(generateDescription(category, curPage, entry))
+            .setFooter({
+                text: generateFooter(category, curPage, entry),
+            });
+
+        await interaction.editReply({
+            embeds: [embed],
+        });
+    });
+
+    collector.on('end', async () => {
+        row.components.forEach(e => e.setDisabled(true));
+
+        await interaction.editReply({
+            components: [row],
+        });
+    });
 }
 
 export const data = new SlashCommandBuilder()
@@ -138,11 +235,11 @@ export async function execute(interaction: CommandInteraction) {
             .setStyle('PRIMARY')
             .setCustomId(CustomId.createCustomId('wishlist', 'prev'))
             .setLabel('Prev');
-        const nextbutton = new MessageButton()
+        const nextButton = new MessageButton()
             .setStyle('PRIMARY')
             .setCustomId(CustomId.createCustomId('wishlist', 'next'))
             .setLabel('Next');
-        const row = new MessageActionRow().addComponents(prevButton, nextbutton);
+        const row = new MessageActionRow().addComponents(prevButton, nextButton);
 
         const embed = new MessageEmbed()
             .setColor(0x28C2FF)
@@ -155,11 +252,12 @@ export async function execute(interaction: CommandInteraction) {
                 text: generateFooter(category, 1, entry),
             });
 
-
         await interaction.reply({
             embeds: [embed],
             components: [row],
         });
+
+        handleInteractions({ interaction, row, category, entry, embed });
     } else {
         await interaction.reply({
             content: `No wishlist found for ${targetUser.username}`,

@@ -12,7 +12,7 @@ import { character, wishlist } from '../database';
 import type { BackupMetadata, CharacterDatabase, DatabaseType, WishlistDatabase } from '../structures';
 import { CustomId } from '../utils';
 
-const maxResponseTime = 5000;
+const MAX_RESPONSE_TIME = 5000;
 
 function generateDescription(backups: BackupMetadata[]): string {
     let ret = 'Select a backup to import\n\n';
@@ -129,7 +129,7 @@ function handleResponse(args: Args) {
 
     const channel = interaction.channel as TextBasedChannel;
 
-    channel.awaitMessageComponent({ filter, time: maxResponseTime, componentType: 'BUTTON' })
+    channel.awaitMessageComponent({ filter, time: MAX_RESPONSE_TIME, componentType: 'BUTTON' })
         .then(async i => {
             const label = CustomId.getId(i.customId);
             const index = parseInt(label) - 1;
@@ -146,7 +146,6 @@ function handleResponse(args: Args) {
 
             const newDescription = embed.description?.replace('Respond within 5 seconds', content) as string;
             embed.setDescription(newDescription);
-
 
             await i.update({
                 embeds: [embed],
