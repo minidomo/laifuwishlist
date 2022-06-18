@@ -15,6 +15,9 @@ import { CustomId } from '../utils';
 
 const seriesCustomId = CustomId.createCustomId('remove', 'series');
 const characterCustomId = CustomId.createCustomId('remove', 'character');
+const wishlistTextCustomId = CustomId.createCustomId('remove', 'wishlist-text');
+
+const WISHLIST_TEXT_REGEX = /^(\d+)/;
 
 function parseSeries(str: string): number[] {
     return Array.from(str.matchAll(/\d+/g), e => parseInt(e[0]));
@@ -43,6 +46,26 @@ function parseCharacters(str: string): WishlistCharacterInternal[] {
 
             const obj: WishlistCharacterInternal = {
                 globalId: parseInt(parts[0]),
+                images,
+            };
+            return obj;
+        });
+}
+
+function parseWishlistText(str: string): WishlistCharacterInternal[] {
+    return str.split(/[\r\n]+/)
+        .filter(line => WISHLIST_TEXT_REGEX.test(line))
+        .map(line => {
+            const match = line.match(WISHLIST_TEXT_REGEX) as RegExpMatchArray;
+            const globalId = parseInt(match[1]);
+            const images: Set<number> = new Set();
+
+            for (let i = 1; i <= 9; i++) {
+                images.add(i);
+            }
+
+            const obj: WishlistCharacterInternal = {
+                globalId,
                 images,
             };
             return obj;
@@ -120,10 +143,19 @@ export async function execute(interaction: CommandInteraction) {
         .setPlaceholder('<gid> <images>\n630 269\n4652')
         .setStyle('PARAGRAPH');
 
-    const firstRow = new MessageActionRow<TextInputComponent>().addComponents(seriesInput);
-    const secondRow = new MessageActionRow<TextInputComponent>().addComponents(characterInput);
+    const wishlistTextInput = new TextInputComponent()
+        .setLabel('Wishlist text')
+        .setCustomId(wishlistTextCustomId)
+        .setPlaceholder('13540 | Anju Emma (アンジュ・エマ)・285inf')
+        .setStyle('PARAGRAPH');
 
-    modal.addComponents(firstRow, secondRow);
+    const rows = [
+        new MessageActionRow<TextInputComponent>().addComponents(seriesInput),
+        new MessageActionRow<TextInputComponent>().addComponents(characterInput),
+        new MessageActionRow<TextInputComponent>().addComponents(wishlistTextInput),
+    ];
+
+    modal.addComponents(...rows);
 
     await interaction.showModal(modal);
 }
@@ -135,9 +167,12 @@ export function isPermitted(_interaction: CommandInteraction): boolean {
 export async function handleModal(interaction: ModalSubmitInteraction) {
     const seriesString = interaction.fields.getTextInputValue(seriesCustomId);
     const charactersString = interaction.fields.getTextInputValue(characterCustomId);
+    const wishlistTextString = interaction.fields.getTextInputValue(wishlistTextCustomId);
 
     const series = parseSeries(seriesString);
     const characters = parseCharacters(charactersString);
+    const wishlistCharacters = parseWishlistText(wishlistTextString);
+    characters.push(...wishlistCharacters);
 
     const guild = interaction.guild as Guild;
 

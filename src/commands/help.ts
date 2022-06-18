@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
 
-const description = 'This bot is a custom wishlist container for LaifuBot and an external character datanase. '
+const description = 'This bot is a custom wishlist container for LaifuBot and an external character database. '
     + 'This is not affiliated with LaifuBot.';
 
 const everyoneCommands = [
