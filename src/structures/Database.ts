@@ -3,14 +3,12 @@ import { join } from 'node:path';
 import { setInterval } from 'node:timers';
 import dayjs from 'dayjs';
 import type { BackupMetadata } from './types';
-import { production } from '../config';
 import { logger } from '../utils';
 
 export type DatabaseKey = string | number;
 export type DatabaseType = 'wishlist' | 'character';
 
-const branch = production ? 'prod' : 'dev';
-const directory = join(__dirname, '..', '..', 'data', branch);
+const directory = join(__dirname, '..', '..', 'data');
 const MAX_BACKUPS = 5;
 
 export abstract class Database<K extends DatabaseKey, V> {
