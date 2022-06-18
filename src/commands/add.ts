@@ -9,15 +9,20 @@ import {
     TextInputComponent,
 } from 'discord.js';
 import { cleanCharacterName } from 'laifutil';
+import { MISSING_INFO } from '../constants';
 import { character, wishlist } from '../database';
 import type { WishlistCharacterInternal } from '../structures';
 import { CustomId } from '../utils';
+
+const seriesModalCustomId = CustomId.createCustomId('add', 'modal-series');
+const characterModalCustomId = CustomId.createCustomId('add', 'modal-character');
 
 const seriesCustomId = CustomId.createCustomId('add', 'series');
 const characterCustomId = CustomId.createCustomId('add', 'character');
 const wishlistTextCustomId = CustomId.createCustomId('add', 'wishlist-text');
 
 const WISHLIST_TEXT_REGEX = /^(\d+)/;
+type Category = 'series' | 'characters';
 
 function parseSeries(str: string): number[] {
     return Array.from(str.matchAll(/\d+/g), e => parseInt(e[0]));
@@ -82,7 +87,7 @@ function seriesDescription(series: number[]): string {
     series.forEach(id => {
         const res = character.query({ seriesId: id });
 
-        let title = '*MISSING INFO*';
+        let title: string = MISSING_INFO;
         if (res) {
             title = res.series.englishTitle;
         }
@@ -103,7 +108,7 @@ function characterDescription(characters: WishlistCharacterInternal[]): string {
     characters.forEach(e => {
         const res = character.query({ globalId: e.globalId });
 
-        let name = '*MISSING INFO*';
+        let name: string = MISSING_INFO;
         if (res) {
             name = cleanCharacterName(res.characterName);
         }
@@ -123,37 +128,64 @@ function characterDescription(characters: WishlistCharacterInternal[]): string {
 }
 
 export const data = new SlashCommandBuilder()
+    .addStringOption(option =>
+        option
+            .setChoices(
+                {
+                    name: 'Series',
+                    value: 'series',
+                },
+                {
+                    name: 'Characters',
+                    value: 'characters',
+                },
+            )
+            .setName('category')
+            .setDescription('The category to display')
+            .setRequired(true))
     .setName('add')
     .setDescription('Add characters or series to your wishlist');
 
 export async function execute(interaction: CommandInteraction) {
+    const { options } = interaction;
+
+    const category = options.getString('category') as Category;
+    const modelCustomId = category === 'characters' ? characterModalCustomId : seriesModalCustomId;
+
     const modal = new Modal()
         .setTitle('Add to Wishlist')
-        .setCustomId(CustomId.createCustomId('add', 'modal'));
+        .setCustomId(modelCustomId);
 
-    const seriesInput = new TextInputComponent()
-        .setLabel('Series IDs')
-        .setCustomId(seriesCustomId)
-        .setPlaceholder('351 56')
-        .setStyle('SHORT');
+    const rows = [];
 
-    const characterInput = new TextInputComponent()
-        .setLabel('Global IDs (image numbers are optional)')
-        .setCustomId(characterCustomId)
-        .setPlaceholder('<gid> <images>\n630 269\n4652')
-        .setStyle('PARAGRAPH');
+    if (category === 'characters') {
+        const characterInput = new TextInputComponent()
+            .setLabel('Global IDs (image numbers are optional)')
+            .setCustomId(characterCustomId)
+            .setPlaceholder('<gid> <images>\n630 269\n4652')
+            .setStyle('PARAGRAPH');
 
-    const wishlistTextInput = new TextInputComponent()
-        .setLabel('Wishlist text')
-        .setCustomId(wishlistTextCustomId)
-        .setPlaceholder('13540 | Anju Emma (アンジュ・エマ)・285inf')
-        .setStyle('PARAGRAPH');
+        const wishlistTextInput = new TextInputComponent()
+            .setLabel('Wishlist text')
+            .setCustomId(wishlistTextCustomId)
+            .setPlaceholder('13540 | Anju Emma (アンジュ・エマ)・285inf')
+            .setStyle('PARAGRAPH');
 
-    const rows = [
-        new MessageActionRow<TextInputComponent>().addComponents(seriesInput),
-        new MessageActionRow<TextInputComponent>().addComponents(characterInput),
-        new MessageActionRow<TextInputComponent>().addComponents(wishlistTextInput),
-    ];
+        rows.push(
+            new MessageActionRow<TextInputComponent>().addComponents(characterInput),
+            new MessageActionRow<TextInputComponent>().addComponents(wishlistTextInput),
+        );
+    } else {
+        const seriesInput = new TextInputComponent()
+            .setLabel('Series IDs')
+            .setCustomId(seriesCustomId)
+            .setPlaceholder('351 56')
+            .setStyle('PARAGRAPH');
+
+        rows.push(
+            new MessageActionRow<TextInputComponent>().addComponents(seriesInput),
+        );
+    }
 
     modal.addComponents(...rows);
 

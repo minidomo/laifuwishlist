@@ -26,7 +26,6 @@ export interface WishlistCharacterInternal {
 }
 
 export type UserId = string;
-
 export type Modification = 'add' | 'remove';
 
 function interalize(entry: WishlistEntry): WishlistEntryInternal {
@@ -69,6 +68,7 @@ function uninteralize(entry: WishlistEntryInternal): WishlistEntry {
 
 function addCharacter(map: Map<number, WishlistCharacterInternal>, character: WishlistCharacterInternal) {
     let entry = map.get(character.globalId);
+
     if (!entry) {
         entry = {
             globalId: character.globalId,
@@ -83,6 +83,7 @@ function addCharacter(map: Map<number, WishlistCharacterInternal>, character: Wi
 
 function removeCharacter(map: Map<number, WishlistCharacterInternal>, character: WishlistCharacterInternal) {
     const entry = map.get(character.globalId);
+
     if (entry) {
         character.images.forEach(e => entry.images.delete(e));
         if (entry.images.size === 0) {
@@ -111,6 +112,24 @@ export class WishlistDatabase extends Database<UserId, WishlistEntryInternal> {
         return this.storage.get(userId) ?? null;
     }
 
+    hasAllImages(data: WishlistCharacterInternal | Set<number>): boolean {
+        let images: Set<number>;
+
+        if (data instanceof Set) {
+            images = data;
+        } else {
+            images = data.images;
+        }
+
+        let ret = true;
+
+        for (let i = 1; i <= 9; i++) {
+            ret &&= images.has(i);
+        }
+
+        return ret;
+    }
+
     update(modification: Modification, userId: string, guildId: string, data: WishlistCharacterInternal | number) {
         let entry = this.storage.get(userId);
 
@@ -134,10 +153,10 @@ export class WishlistDatabase extends Database<UserId, WishlistEntryInternal> {
                 addCharacter(entry.globalIds, data);
             }
         } else if (typeof data === 'number') {
-            entry.seriesIds.delete(data);
-        } else {
-            removeCharacter(entry.globalIds, data);
-        }
+                entry.seriesIds.delete(data);
+            } else {
+                removeCharacter(entry.globalIds, data);
+            }
     }
 
     search(guildId: string, globalId: number, seriesId: number, imageNumber: number): UserId[] {

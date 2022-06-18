@@ -1,12 +1,9 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import dayjs from 'dayjs';
-import calender from 'dayjs/plugin/calendar';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
 import { Bounds, CharacterRarityInfo, RarityConstants } from 'laifutil';
 import { character } from '../database';
 import type { CharacterEntry } from '../structures';
-
-dayjs.extend(calender);
 
 export const data = new SlashCommandBuilder()
     .addIntegerOption(option =>
@@ -23,9 +20,7 @@ export async function execute(interaction: CommandInteraction) {
     const globalId = options.getInteger('global_id');
     if (typeof globalId === 'number') {
         const characterInfo = character.query({ globalId });
-        const embed = makeCharacterEmbed(characterInfo)
-            .setColor(0xF0B67F);
-
+        const embed = createCharacterEmbed(characterInfo);
         await interaction.reply({
             embeds: [embed],
         });
@@ -41,7 +36,7 @@ export function isPermitted(_interaction: CommandInteraction): boolean {
     return true;
 }
 
-function getRarityString(rarity: CharacterRarityInfo): string {
+function createRarityString(rarity: CharacterRarityInfo): string {
     let burnRate = (rarity.totalClaimed - rarity.existingAmount) / rarity.totalClaimed * 100;
     if (rarity.totalClaimed === 0) {
         burnRate = 0;
@@ -49,14 +44,14 @@ function getRarityString(rarity: CharacterRarityInfo): string {
     return `${rarity.existingAmount}・${rarity.totalClaimed} \`(${burnRate.toFixed(0)}%)\``;
 }
 
-function getRankString(range: Bounds): string {
+function createRankString(range: Bounds): string {
     const lower = Math.min(range.lower, range.upper);
     const upper = Math.max(range.lower, range.upper);
     return `${lower}・${upper}`;
 }
 
-function makeCharacterEmbed(characterInfo: CharacterEntry | null) {
-    const embed = new MessageEmbed();
+function createCharacterEmbed(characterInfo: CharacterEntry | null) {
+    const embed = new MessageEmbed().setColor(0xF0B67F);
 
     if (characterInfo === null) {
         embed.setDescription('Could not find character');
@@ -69,16 +64,16 @@ function makeCharacterEmbed(characterInfo: CharacterEntry | null) {
                 `**Global ID:** ${characterInfo.globalId}\n` +
                 `**Total Images:** ${characterInfo.totalImages}\n` +
                 `**Influence:** ${characterInfo.influence}\n` +
-                `**Rank:** ${getRankString(characterInfo.influenceRankRange)}\n`,
+                `**Rank:** ${createRankString(characterInfo.influenceRankRange)}\n`,
                 true)
             .addField('Rarity Burn Rate',
-                `**${RarityConstants.ALPHA.symbol}** ${getRarityString(characterInfo.rarities.alpha)}\n` +
-                `**${RarityConstants.BETA.symbol}** ${getRarityString(characterInfo.rarities.beta)}\n` +
-                `**${RarityConstants.GAMMA.symbol}** ${getRarityString(characterInfo.rarities.gamma)}\n` +
-                `**${RarityConstants.DELTA.symbol}** ${getRarityString(characterInfo.rarities.delta)}\n` +
-                `**${RarityConstants.EPSILON.symbol}** ${getRarityString(characterInfo.rarities.epsilon)}\n` +
-                `**${RarityConstants.ZETA.symbol}** ${getRarityString(characterInfo.rarities.zeta)}\n` +
-                `**${RarityConstants.ULTRA.symbol}** ${getRarityString(characterInfo.rarities.ultra)}\n`,
+                `**${RarityConstants.ALPHA.symbol}** ${createRarityString(characterInfo.rarities.alpha)}\n` +
+                `**${RarityConstants.BETA.symbol}** ${createRarityString(characterInfo.rarities.beta)}\n` +
+                `**${RarityConstants.GAMMA.symbol}** ${createRarityString(characterInfo.rarities.gamma)}\n` +
+                `**${RarityConstants.DELTA.symbol}** ${createRarityString(characterInfo.rarities.delta)}\n` +
+                `**${RarityConstants.EPSILON.symbol}** ${createRarityString(characterInfo.rarities.epsilon)}\n` +
+                `**${RarityConstants.ZETA.symbol}** ${createRarityString(characterInfo.rarities.zeta)}\n` +
+                `**${RarityConstants.ULTRA.symbol}** ${createRarityString(characterInfo.rarities.ultra)}\n`,
                 true)
             .addField('Series',
                 `**ENG:** ${characterInfo.series.englishTitle}\n` +

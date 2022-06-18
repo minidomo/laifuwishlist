@@ -14,7 +14,7 @@ import { CustomId } from '../utils';
 
 const MAX_RESPONSE_TIME = 5000;
 
-function generateDescription(backups: BackupMetadata[]): string {
+function createDescription(backups: BackupMetadata[]): string {
     let ret = 'Select a backup to import\n\n';
 
     ret += backups
@@ -26,7 +26,7 @@ function generateDescription(backups: BackupMetadata[]): string {
     return ret;
 }
 
-function generateButtons(count: number): MessageButton[] {
+function createButtons(count: number): MessageButton[] {
     const arr: MessageButton[] = [];
 
     for (let i = 1; i <= count; i++) {
@@ -77,9 +77,9 @@ export async function execute(interaction: CommandInteraction) {
         .setTitle(`Available Backups: ${databaseType[0].toUpperCase()}${databaseType.substring(1)}`);
 
     if (backups.length > 0) {
-        embed.setDescription(generateDescription(backups));
+        embed.setDescription(createDescription(backups));
 
-        const buttons = generateButtons(backups.length);
+        const buttons = createButtons(backups.length);
         const row = new MessageActionRow().addComponents(buttons);
 
         await interaction.reply({

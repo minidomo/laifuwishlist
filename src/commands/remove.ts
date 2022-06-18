@@ -9,6 +9,7 @@ import {
     TextInputComponent,
 } from 'discord.js';
 import { cleanCharacterName } from 'laifutil';
+import { MISSING_INFO } from '../constants';
 import { character, wishlist } from '../database';
 import type { WishlistCharacterInternal } from '../structures';
 import { CustomId } from '../utils';
@@ -82,7 +83,7 @@ function seriesDescription(series: number[]): string {
     series.forEach(id => {
         const res = character.query({ seriesId: id });
 
-        let title = '*MISSING INFO*';
+        let title: string = MISSING_INFO;
         if (res) {
             title = res.series.englishTitle;
         }
@@ -103,7 +104,7 @@ function characterDescription(characters: WishlistCharacterInternal[]): string {
     characters.forEach(e => {
         const res = character.query({ globalId: e.globalId });
 
-        let name = '*MISSING INFO*';
+        let name: string = MISSING_INFO;
         if (res) {
             name = cleanCharacterName(res.characterName);
         }
