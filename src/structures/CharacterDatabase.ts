@@ -45,11 +45,11 @@ export class CharacterDatabase extends Database<GlobalId, CharacterEntry> {
     }
 
     query(options: QueryOptions): CharacterEntry | null {
-        if (options.globalId) {
+        if (typeof options.globalId === 'number') {
             return this.storage.get(options.globalId) ?? null;
         }
 
-        if (options.seriesId) {
+        if (typeof options.seriesId === 'number') {
             const it = this.storage.values();
             for (let cur = it.next(); !cur.done; cur = it.next()) {
                 if (cur.value.series.id === options.seriesId) {

@@ -1,19 +1,7 @@
-import { Client, Intents, MessageEmbed } from 'discord.js';
-import {
-    BaseSimpleCharacter,
-    BurnCharacterEmbed,
-    GachaCharacterEmbed,
-    InfoEmbed,
-    isBurnCharacterEmbed,
-    isGachaCharacterEmbed,
-    isInfoEmbed,
-    isLaifuBot,
-    isViewEmbed,
-    ViewEmbed,
-} from 'laifutil';
+import { Client, Intents } from 'discord.js';
 import { commands } from './commands';
 import { token } from './config';
-import { character, wishlist } from './database';
+import { CheckWishlist, UpdateDatabase } from './plugin';
 import { CustomId, logger } from './utils';
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] }) as Client<true>;
@@ -23,41 +11,8 @@ client.once('ready', () => {
 });
 
 client.on('messageCreate', message => {
-    if (!message.guild) return;
-
-    if (isLaifuBot(message) && message.embeds[0]) {
-        const embed = message.embeds[0];
-
-        if (isInfoEmbed(embed)) {
-            character.update(new InfoEmbed(embed));
-        } else if (isGachaCharacterEmbed(embed) || isBurnCharacterEmbed(embed) || isViewEmbed(embed)) {
-            let characterEmbed: BaseSimpleCharacter;
-
-            if (isGachaCharacterEmbed(embed)) {
-                characterEmbed = new GachaCharacterEmbed(embed);
-            } else if (isBurnCharacterEmbed(embed)) {
-                characterEmbed = new BurnCharacterEmbed(embed);
-            } else {
-                characterEmbed = new ViewEmbed(embed);
-            }
-
-            const userIds = wishlist.search(
-                message.guild.id,
-                characterEmbed.globalId,
-                characterEmbed.series.id,
-                characterEmbed.image.currentNumber,
-            );
-
-            if (userIds.length > 0) {
-                const pingEmbed = new MessageEmbed()
-                    .setTitle('Users that may be interested')
-                    .setDescription(userIds.map(id => `<@${id}>`).join(' '))
-                    .setFooter({ text: 'Developed by JB#9224' });
-
-                message.reply({ embeds: [pingEmbed] });
-            }
-        }
-    }
+    UpdateDatabase.run(message);
+    CheckWishlist.run(message);
 });
 
 client.on('interactionCreate', interaction => {

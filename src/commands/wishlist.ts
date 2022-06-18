@@ -55,8 +55,8 @@ function generateDescription(category: Category, page: number, entry: WishlistEn
                 return temp;
             })
             .sort((a, b) => {
-                const aVal = a.character?.characterName;
-                const bVal = b.character?.characterName;
+                const aVal = a.character?.characterName.toLowerCase();
+                const bVal = b.character?.characterName.toLowerCase();
 
                 if (aVal && bVal) {
                     return aVal < bVal ? -1 : 1;
@@ -86,7 +86,8 @@ function generateDescription(category: Category, page: number, entry: WishlistEn
 
             let characterInfo = '*MISSING INFO*';
             if (e.character) {
-                characterInfo = `${cleanCharacterName(e.character.characterName)}・**${e.character.influence}**`;
+                characterInfo = `${cleanCharacterName(e.character.characterName)}・`
+                    + `**${e.character.influence}** <:inf:755213119055200336>`;
             }
 
             ret += `\`${e.basic.globalId}\` ${characterInfo}${idsText}\n`;
@@ -107,8 +108,8 @@ function generateDescription(category: Category, page: number, entry: WishlistEn
                 return temp;
             })
             .sort((a, b) => {
-                const aVal = a.englishTitle;
-                const bVal = b.englishTitle;
+                const aVal = a.englishTitle?.toLowerCase();
+                const bVal = b.englishTitle?.toLowerCase();
 
                 if (aVal && bVal) {
                     return aVal < bVal ? -1 : 1;
