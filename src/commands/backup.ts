@@ -10,34 +10,17 @@ import {
 import { ownerClientId } from '../config';
 import { character, wishlist } from '../database';
 import type { BackupMetadata, CharacterDatabase, DatabaseType, WishlistDatabase } from '../structures';
-import { CustomId } from '../utils';
+import { capitalize, CustomId } from '../utils';
+
+interface Args {
+    interaction: CommandInteraction;
+    embed: MessageEmbed;
+    backups: BackupMetadata[];
+    row: MessageActionRow;
+    unique: string;
+}
 
 const MAX_RESPONSE_TIME = 5000;
-
-function createDescription(backups: BackupMetadata[]): string {
-    let ret = 'Select a backup to import\n\n';
-
-    ret += backups
-        .map((e, index) => `\`${index + 1}\` ${time(e.dateCreated)}`)
-        .join('\n');
-
-    ret += '\n\nRespond within 5 seconds';
-
-    return ret;
-}
-
-function createButtons(count: number): MessageButton[] {
-    const arr: MessageButton[] = [];
-
-    for (let i = 1; i <= count; i++) {
-        arr.push(new MessageButton()
-            .setCustomId(CustomId.createCustomId('backup', `${i}`))
-            .setLabel(`${i}`)
-            .setStyle('PRIMARY'));
-    }
-
-    return arr;
-}
 
 export const data = new SlashCommandBuilder()
     .addStringOption(option =>
@@ -60,6 +43,7 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: CommandInteraction) {
     const { options } = interaction;
+    const unique = CustomId.createUnique();
 
     const databaseType = options.getString('database') as DatabaseType;
     let database: WishlistDatabase | CharacterDatabase;
@@ -74,12 +58,12 @@ export async function execute(interaction: CommandInteraction) {
 
     const embed = new MessageEmbed()
         .setColor(0xFFEF9F)
-        .setTitle(`Available Backups: ${databaseType[0].toUpperCase()}${databaseType.substring(1)}`);
+        .setTitle(`Available Backups: ${capitalize(databaseType)}`);
 
     if (backups.length > 0) {
         embed.setDescription(createDescription(backups));
 
-        const buttons = createButtons(backups.length);
+        const buttons = createButtons(unique, backups.length);
         const row = new MessageActionRow().addComponents(buttons);
 
         await interaction.reply({
@@ -88,11 +72,12 @@ export async function execute(interaction: CommandInteraction) {
             components: [row],
         });
 
-        handleResponse({
+        handleButtons({
             interaction,
             backups,
             embed,
-            buttons,
+            row,
+            unique,
         });
     } else {
         embed.setDescription('No backups available.');
@@ -109,50 +94,68 @@ export function isPermitted(interaction: CommandInteraction): boolean {
     return user.id === ownerClientId;
 }
 
-interface Args {
-    interaction: CommandInteraction;
-    embed: MessageEmbed;
-    backups: BackupMetadata[];
-    buttons: MessageButton[];
-}
-
-function handleResponse(args: Args) {
-    const { interaction, backups, embed, buttons } = args;
+function handleButtons(args: Args) {
+    const { interaction, backups, embed, row, unique } = args;
 
     function filter(i: MessageComponentInteraction): boolean {
-        i.deferUpdate();
-        return i.user.id === interaction.user.id && CustomId.getGroup(i.customId) === 'backup';
+        return i.user.id === interaction.user.id && CustomId.getUnique(i.customId) === unique;
     }
 
-    const row = new MessageActionRow().addComponents(buttons);
-    buttons.forEach(button => button.setDisabled(true));
+    row.components.forEach(e => e.setDisabled(true));
 
     const channel = interaction.channel as TextBasedChannel;
+    const collector = channel.createMessageComponentCollector({
+        filter,
+        time: MAX_RESPONSE_TIME,
+        componentType: 'BUTTON',
+        max: 1,
+    });
 
-    channel.awaitMessageComponent({ filter, time: MAX_RESPONSE_TIME, componentType: 'BUTTON' })
-        .then(async i => {
-            const label = CustomId.getId(i.customId);
-            const index = parseInt(label) - 1;
+    collector.on('collect', async i => {
+        i.deferUpdate();
 
-            const success = await character.importData(backups[index]);
+        const label = CustomId.getId(i.customId);
+        const index = parseInt(label) - 1;
 
-            let content = '';
+        const success = await character.importData(backups[index]);
 
-            if (success) {
-                content = `Successfully switched the database to \`${label}\``;
-            } else {
-                content = `Failed to switch the database to \`${label}\``;
-            }
+        let content = '';
 
-            const newDescription = embed.description?.replace('Respond within 5 seconds', content) as string;
-            embed.setDescription(newDescription);
+        if (success) {
+            content = `\n\nSuccessfully switched the database to \`${label}\``;
+        } else {
+            content = `\n\nFailed to switch the database to \`${label}\``;
+        }
 
-            await i.update({
-                embeds: [embed],
-                components: [row],
-            });
-        })
-        .catch(async () => {
-            await interaction.editReply({ embeds: [embed], components: [row] });
-        });
+        embed.setDescription(embed.description + content);
+
+        await interaction.editReply({ embeds: [embed] });
+    });
+
+    collector.on('end', async () => {
+        await interaction.editReply({ components: [row] });
+    });
+}
+
+function createDescription(backups: BackupMetadata[]): string {
+    let ret = 'Select a backup to import\n\n';
+
+    ret += backups
+        .map((e, index) => `\`${index + 1}\` ${time(e.dateCreated)}`)
+        .join('\n');
+
+    return ret;
+}
+
+function createButtons(unique: string, count: number): MessageButton[] {
+    const arr: MessageButton[] = [];
+
+    for (let i = 1; i <= count; i++) {
+        arr.push(new MessageButton()
+            .setCustomId(CustomId.createCustomId(unique, `${i}`))
+            .setLabel(`${i}`)
+            .setStyle('PRIMARY'));
+    }
+
+    return arr;
 }

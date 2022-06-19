@@ -24,8 +24,8 @@ client.on('interactionCreate', interaction => {
             command.execute(interaction);
         }
     } else if (interaction.isModalSubmit()) {
-        const group = CustomId.getGroup(interaction.customId);
-        const command = commands.get(group);
+        const unique = CustomId.getUnique(interaction.customId);
+        const command = commands.get(unique);
         if (command && command.handleModal) {
             command.handleModal(interaction);
         }

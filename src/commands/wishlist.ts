@@ -30,6 +30,7 @@ interface Args {
     category: Category;
     entry: WishlistEntryInternal;
     embed: MessageEmbed,
+    unique: string;
 }
 
 type Label = 'prev' | 'next';
@@ -63,6 +64,7 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: CommandInteraction) {
     const { options, user } = interaction;
+    const unique = CustomId.createUnique();
 
     const category = options.getString('category') as Category;
     const targetUser = options.getUser('user') ?? user;
@@ -72,12 +74,12 @@ export async function execute(interaction: CommandInteraction) {
     if (entry) {
         const prevButton = new MessageButton()
             .setStyle('PRIMARY')
-            .setCustomId(CustomId.createCustomId('wishlist', 'prev'))
+            .setCustomId(CustomId.createCustomId(unique, 'prev'))
             .setLabel('Prev');
 
         const nextButton = new MessageButton()
             .setStyle('PRIMARY')
-            .setCustomId(CustomId.createCustomId('wishlist', 'next'))
+            .setCustomId(CustomId.createCustomId(unique, 'next'))
             .setLabel('Next');
 
         const row = new MessageActionRow().addComponents(prevButton, nextButton);
@@ -96,7 +98,7 @@ export async function execute(interaction: CommandInteraction) {
             components: [row],
         });
 
-        handlePages({ interaction, row, category, entry, embed });
+        handlePages({ interaction, row, category, entry, embed, unique });
     } else {
         await interaction.reply({ content: `No wishlist found for ${targetUser.username}` });
     }
@@ -213,14 +215,13 @@ function createFooterText(category: Category, page: number, entry: WishlistEntry
 }
 
 function handlePages(args: Args) {
-    const { interaction, row, category, entry, embed } = args;
+    const { interaction, row, category, entry, embed, unique } = args;
 
     const size = category === 'characters' ? entry.globalIds.size : entry.seriesIds.size;
     const lastPage = Pages.calculateLastPage(size, MAX_LINES_PER_PAGE);
 
     function filter(i: MessageComponentInteraction): boolean {
-        i.deferUpdate();
-        return i.user.id === interaction.user.id && CustomId.getGroup(i.customId) === 'wishlist';
+        return i.user.id === interaction.user.id && CustomId.getUnique(i.customId) === unique;
     }
 
     const channel = interaction.channel as TextChannel;
@@ -232,6 +233,8 @@ function handlePages(args: Args) {
 
     let curPage = 1;
     collector.on('collect', async i => {
+        i.deferUpdate();
+
         const label = CustomId.getId(i.customId) as Label;
 
         if (label === 'next') {
