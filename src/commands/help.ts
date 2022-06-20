@@ -5,12 +5,11 @@ const description = 'This bot is a custom wishlist container for LaifuBot and an
     + 'This is not affiliated with LaifuBot.';
 
 const everyoneCommands = [
-    'add',
+    'modfy',
     'help',
     'missing',
     'ping',
     'query',
-    'remove',
     'wishlist',
 ].sort().join(', ');
 
