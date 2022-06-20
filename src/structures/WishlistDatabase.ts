@@ -26,7 +26,7 @@ export interface WishlistCharacterInternal {
 }
 
 export type UserId = string;
-export type Modification = 'add' | 'remove';
+export type Action = 'add' | 'remove';
 
 function interalize(entry: WishlistEntry): WishlistEntryInternal {
     const ret: WishlistEntryInternal = {
@@ -130,7 +130,7 @@ export class WishlistDatabase extends Database<UserId, WishlistEntryInternal> {
         return ret;
     }
 
-    update(modification: Modification, userId: string, guildId: string, data: WishlistCharacterInternal | number) {
+    update(action: Action, userId: string, guildId: string, data: WishlistCharacterInternal | number) {
         let entry = this.storage.get(userId);
 
         if (!entry) {
@@ -146,7 +146,7 @@ export class WishlistDatabase extends Database<UserId, WishlistEntryInternal> {
 
         entry.guildIds.add(guildId);
 
-        if (modification === 'add') {
+        if (action === 'add') {
             if (typeof data === 'number') {
                 entry.seriesIds.add(data);
             } else {
