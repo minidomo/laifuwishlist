@@ -2,8 +2,7 @@ import { readdir, readFile, writeFile, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { setInterval } from 'node:timers';
 import dayjs from 'dayjs';
-import type { BackupMetadata } from './types';
-import { logger } from '../utils';
+import { logger } from '../util';
 
 export type DatabaseKey = string | number;
 export type DatabaseType = 'wishlist' | 'character';
@@ -13,7 +12,7 @@ const MAX_BACKUPS = 5;
 
 export abstract class Database<K extends DatabaseKey, V> {
     protected storage: Map<K, V> = new Map();
-    protected backups: BackupMetadata[] = [];
+    protected backups: BotTypes.BackupMetadata[] = [];
 
     protected abstract fileRegex: RegExp;
     protected abstract exportInterval: number;
@@ -27,7 +26,7 @@ export abstract class Database<K extends DatabaseKey, V> {
         const tempBackups = dir.filter(e => e.isFile() && this.fileRegex.test(e.name))
             .map(e => {
                 const match = e.name.match(this.fileRegex) as RegExpMatchArray;
-                const backup: BackupMetadata = {
+                const backup: BotTypes.BackupMetadata = {
                     filename: e.name,
                     dateCreated: parseInt(match[1]),
                 };
@@ -38,7 +37,7 @@ export abstract class Database<K extends DatabaseKey, V> {
         this.backups.push(...tempBackups);
     }
 
-    protected async addBackup(backup: BackupMetadata) {
+    protected async addBackup(backup: BotTypes.BackupMetadata) {
         if (this.backups.length === MAX_BACKUPS) {
             await unlink(join(directory, this.backups[0].filename));
             this.backups.shift();
@@ -56,11 +55,11 @@ export abstract class Database<K extends DatabaseKey, V> {
         setInterval(() => this.exportData(), this.exportInterval);
     }
 
-    getBackups(): BackupMetadata[] {
+    getBackups(): BotTypes.BackupMetadata[] {
         return this.backups.slice();
     }
 
-    async importData(backup: BackupMetadata = this.backups[this.backups.length - 1]): Promise<boolean> {
+    async importData(backup: BotTypes.BackupMetadata = this.backups[this.backups.length - 1]): Promise<boolean> {
         try {
             const path = join(directory, backup.filename);
 

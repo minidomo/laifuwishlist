@@ -9,7 +9,7 @@ import { cleanCharacterName } from 'laifutil';
 import { MISSING_INFO } from '../constants';
 import { character, wishlist } from '../database';
 import type { CharacterEntry, WishlistEntryInternal } from '../structures';
-import { capitalize, CustomId, Pages } from '../utils';
+import { capitalize, CustomId, Pages } from '../util';
 
 interface CharacterDescriptionInfo {
     id: number;

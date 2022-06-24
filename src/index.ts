@@ -2,7 +2,7 @@ import { Client, Intents } from 'discord.js';
 import { commands } from './commands';
 import { token } from './config';
 import { CheckWishlist, UpdateDatabase } from './plugin';
-import { CustomId, logger } from './utils';
+import { logger } from './util';
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] }) as Client<true>;
 
@@ -22,12 +22,6 @@ client.on('interactionCreate', interaction => {
         const command = commands.get(interaction.commandName);
         if (command && command.isPermitted(interaction)) {
             command.execute(interaction);
-        }
-    } else if (interaction.isModalSubmit()) {
-        const unique = CustomId.getUnique(interaction.customId);
-        const command = commands.get(unique);
-        if (command && command.handleModal) {
-            command.handleModal(interaction);
         }
     }
 });

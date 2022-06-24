@@ -13,7 +13,7 @@ import { cleanCharacterName } from 'laifutil';
 import { MISSING_INFO } from '../constants';
 import { character, wishlist } from '../database';
 import type { Action, WishlistCharacterInternal } from '../structures';
-import { capitalize, CustomId, Pages } from '../utils';
+import { capitalize, CustomId, Pages } from '../util';
 
 interface CustomIdArgs {
     character?: string;

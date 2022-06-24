@@ -9,13 +9,13 @@ import {
 } from 'discord.js';
 import { ownerClientId } from '../config';
 import { character, wishlist } from '../database';
-import type { BackupMetadata, CharacterDatabase, DatabaseType, WishlistDatabase } from '../structures';
-import { capitalize, CustomId } from '../utils';
+import type { CharacterDatabase, DatabaseType, WishlistDatabase } from '../structures';
+import { capitalize, CustomId } from '../util';
 
 interface Args {
     interaction: CommandInteraction;
     embed: MessageEmbed;
-    backups: BackupMetadata[];
+    backups: BotTypes.BackupMetadata[];
     row: MessageActionRow;
     unique: string;
 }
@@ -137,7 +137,7 @@ function handleButtons(args: Args) {
     });
 }
 
-function createDescription(backups: BackupMetadata[]): string {
+function createDescription(backups: BotTypes.BackupMetadata[]): string {
     let ret = 'Select a backup to import\n\n';
 
     ret += backups

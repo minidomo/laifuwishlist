@@ -1,9 +1,10 @@
+import { join } from 'node:path';
 import dayjs from 'dayjs';
 import { createLogger, format, transports } from 'winston';
 
-const logDir = `${__dirname}/../logs`;
+const logDir = join(__dirname, '../../logs');
 const filename = `${dayjs().format('YYYYMMDD-HHmmss')}.log`;
-const logPath = `${logDir}/${filename}`;
+const logPath = join(logDir, filename);
 
 export const logger = createLogger({
     transports: [
