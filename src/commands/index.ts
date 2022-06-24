@@ -7,9 +7,8 @@ import * as modify from './modify';
 import * as ping from './ping';
 import * as query from './query';
 import * as wishlist from './wishlist';
-import type { Command } from '../structures';
 
-export const commands: Map<string, Command> = new Map();
+export const commands: Map<string, BotTypes.Command> = new Map();
 commands
     .set(modify.data.name, modify)
     .set(help.data.name, help)
