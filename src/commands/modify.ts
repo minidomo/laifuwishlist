@@ -192,7 +192,7 @@ function handleModal(args: Args) {
                 idleTime: 10_000,
             });
         })
-        .catch();
+        .catch(() => 0);
 }
 
 function parseSeries(str: string): number[] {
