@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
-import { character } from '../database';
+import { Character } from '../model';
 
 export const data = new SlashCommandBuilder()
     .addIntegerOption(option =>
@@ -16,14 +16,17 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: CommandInteraction) {
     const { options } = interaction;
 
+    await interaction.deferReply();
+
     const maxId = options.getInteger('max_global_id', true);
+    const description = await createDescription(maxId);
 
     const embed = new MessageEmbed()
         .setColor(0xED6A5A)
         .setTitle('Missing Information')
-        .setDescription(createDescription(maxId));
+        .setDescription(description);
 
-    await interaction.reply({
+    await interaction.editReply({
         embeds: [embed],
     });
 }
@@ -32,13 +35,15 @@ export function isPermitted(_interaction: CommandInteraction): boolean {
     return true;
 }
 
-function createDescription(maxId: number): string {
+async function createDescription(maxId: number): Promise<string> {
     const ids: string[] = [];
     let consecutive = 0;
 
+    const characters = (await Character.find({}, 'id').exec()) as BotTypes.CharacterDocument[];
+    const existingIds: Set<number> = new Set(characters.map(e => e.id));
+
     for (let i = 0; i <= maxId + 1; i++) {
-        const res = character.query({ globalId: i });
-        if (res || i === maxId + 1) {
+        if (existingIds.has(i) || i === maxId + 1) {
             if (consecutive === 1) {
                 ids.push(`\`${i - 1}\``);
             } else if (consecutive === 2) {

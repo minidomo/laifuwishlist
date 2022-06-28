@@ -7,19 +7,20 @@ import {
 } from 'discord.js';
 import { cleanCharacterName } from 'laifutil';
 import { MISSING_INFO } from '../constants';
-import { character, wishlist } from '../database';
-import type { CharacterEntry, WishlistEntryInternal } from '../structures';
+import { wishlist } from '../database';
+import { Character } from '../model';
+import type { WishlistEntryInternal } from '../structures';
 import { capitalize, CustomId, Pages } from '../util';
 
 interface CharacterDescriptionInfo {
     id: number;
     images: Set<number>;
-    character: CharacterEntry | null;
+    character: BotTypes.CharacterDocument | null;
 }
 
 interface SeriesDescriptionInfo {
     id: number;
-    englishTitle: string | null;
+    title: string | null;
 }
 
 type Category = 'series' | 'characters';
@@ -70,7 +71,7 @@ export async function execute(interaction: CommandInteraction) {
             .setLabel('Next');
 
         const row = new MessageActionRow().addComponents(prevButton, nextButton);
-        const lines = createLines(category, entry);
+        const lines = await createLines(category, entry);
 
         const embed = new MessageEmbed()
             .setColor(0x28C2FF)
@@ -105,22 +106,30 @@ export function isPermitted(_interaction: CommandInteraction): boolean {
     return true;
 }
 
-function createLines(category: Category, entry: WishlistEntryInternal): string[] {
+function createLines(category: Category, entry: WishlistEntryInternal): Promise<string[]> {
     const lines = category === 'characters' ? createCharacterLines : createSeriesLines;
     return lines(entry);
 }
 
-function createCharacterLines(entry: WishlistEntryInternal): string[] {
-    return Array.from(entry.globalIds.values())
-        .map(e => {
-            const temp: CharacterDescriptionInfo = {
-                id: e.globalId,
-                images: e.images,
-                character: character.query({ globalId: e.globalId }),
-            };
+async function createCharacterLines(entry: WishlistEntryInternal): Promise<string[]> {
+    const arr = await Promise.all(
+        Array.from(entry.globalIds.values())
+            .map(async e => {
+                const character = (
+                    await Character.findOne({ id: e.globalId }).exec()
+                ) as BotTypes.CharacterDocument | null;
 
-            return temp;
-        })
+                const temp: CharacterDescriptionInfo = {
+                    id: e.globalId,
+                    images: e.images,
+                    character,
+                };
+
+                return temp;
+            }),
+    );
+
+    return arr
         .sort((a, b) => a.id - b.id)
         .map(e => {
             let ids = '';
@@ -130,7 +139,7 @@ function createCharacterLines(entry: WishlistEntryInternal): string[] {
 
             let characterInfo: string = MISSING_INFO;
             if (e.character) {
-                characterInfo = `${cleanCharacterName(e.character.characterName)}・`
+                characterInfo = `${cleanCharacterName(e.character.name)}・`
                     + `**${e.character.influence}** <:inf:755213119055200336>`;
             }
 
@@ -138,19 +147,27 @@ function createCharacterLines(entry: WishlistEntryInternal): string[] {
         });
 }
 
-function createSeriesLines(entry: WishlistEntryInternal): string[] {
-    return Array.from(entry.seriesIds)
-        .map(id => {
-            const temp: SeriesDescriptionInfo = {
-                id,
-                englishTitle: character.query({ seriesId: id })?.series.englishTitle ?? null,
-            };
+async function createSeriesLines(entry: WishlistEntryInternal): Promise<string[]> {
+    const arr = await Promise.all(
+        Array.from(entry.seriesIds)
+            .map(async id => {
+                const character = (
+                    await Character.findOne({ 'series.id': id }).exec()
+                ) as BotTypes.CharacterDocument | null;
 
-            return temp;
-        })
+                const temp: SeriesDescriptionInfo = {
+                    id,
+                    title: character?.series.title.english ?? null,
+                };
+
+                return temp;
+            }),
+    );
+
+    return arr
         .sort((a, b) => a.id - b.id)
         .map(e => {
-            const title = e.englishTitle ?? MISSING_INFO;
+            const title = e.title ?? MISSING_INFO;
             return `\`${e.id}\` ${title}`;
         });
 }

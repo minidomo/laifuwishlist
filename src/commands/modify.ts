@@ -11,7 +11,8 @@ import {
 } from 'discord.js';
 import { cleanCharacterName } from 'laifutil';
 import { MISSING_INFO } from '../constants';
-import { character, wishlist } from '../database';
+import { wishlist } from '../database';
+import { Character } from '../model';
 import type { Action, WishlistCharacterInternal } from '../structures';
 import { capitalize, CustomId, Pages } from '../util';
 
@@ -136,7 +137,7 @@ function handleModal(args: Args) {
     }
 
     interaction.awaitModalSubmit({ filter, time: 30_000 })
-        .then(i => {
+        .then(async i => {
             const category = CustomId.getId(i.customId) as Category;
 
             let lines: string[];
@@ -149,7 +150,7 @@ function handleModal(args: Args) {
                 const guild = i.guild as Guild;
                 characters.forEach(e => wishlist.update(action, i.user.id, guild.id, e));
 
-                lines = createCharacterLines(characters);
+                lines = await createCharacterLines(characters);
             } else {
                 const seriesString = i.fields.getTextInputValue(customId.series as string);
 
@@ -158,7 +159,7 @@ function handleModal(args: Args) {
                 const guild = i.guild as Guild;
                 series.forEach(e => wishlist.update(action, i.user.id, guild.id, e));
 
-                lines = createSeriesLines(series);
+                lines = await createSeriesLines(series);
             }
 
             const prevButton = new MessageButton()
@@ -172,10 +173,12 @@ function handleModal(args: Args) {
                 .setLabel('Next');
 
             const row = new MessageActionRow().addComponents(prevButton, nextButton);
+            const title = action === 'add' ? 'Added to wishlist' : 'Removed from wishlist';
+            const color = action === 'add' ? 0x7BF1A8 : 0xFF5376;
 
             const embed = new MessageEmbed()
-                .setColor(0x7BF1A8)
-                .setTitle('Added to wishlist')
+                .setColor(color)
+                .setTitle(title)
                 .setDescription(Pages.createDescription(lines, 1, MAX_LINES_PER_PAGE))
                 .setFooter({ text: Pages.createFooterText(lines.length, 1, capitalize(category), MAX_LINES_PER_PAGE) });
 
@@ -249,35 +252,39 @@ function parseWishlistText(str: string): WishlistCharacterInternal[] {
         });
 }
 
-function createSeriesLines(ids: number[]): string[] {
-    return ids.map(id => {
-        const res = character.query({ seriesId: id });
+function createSeriesLines(ids: number[]): Promise<string[]> {
+    return Promise.all(
+        ids.map(async id => {
+            const res = (await Character.findOne({ 'series.id': id }).exec()) as BotTypes.CharacterDocument | null;
 
-        let title: string = MISSING_INFO;
-        if (res) {
-            title = res.series.englishTitle;
-        }
+            let title: string = MISSING_INFO;
+            if (res) {
+                title = res.series.title.english;
+            }
 
-        return `\`${id}\` ${title}`;
-    });
+            return `\`${id}\` ${title}`;
+        }),
+    );
 }
 
-function createCharacterLines(characters: WishlistCharacterInternal[]): string[] {
-    return characters.map(e => {
-        const res = character.query({ globalId: e.globalId });
+function createCharacterLines(characters: WishlistCharacterInternal[]): Promise<string[]> {
+    return Promise.all(
+        characters.map(async e => {
+            const res = (await Character.findOne({ id: e.globalId }).exec()) as BotTypes.CharacterDocument | null;
 
-        let name: string = MISSING_INFO;
-        if (res) {
-            name = cleanCharacterName(res.characterName);
-        }
+            let name: string = MISSING_INFO;
+            if (res) {
+                name = cleanCharacterName(res.name);
+            }
 
-        let ids = '';
-        if (!wishlist.hasAllImages(e.images)) {
-            ids = ` \`[${Array.from(e.images).sort().join('')}]\``;
-        }
+            let ids = '';
+            if (!wishlist.hasAllImages(e.images)) {
+                ids = ` \`[${Array.from(e.images).sort().join('')}]\``;
+            }
 
-        return `\`${e.globalId}\` ${name}${ids}`;
-    });
+            return `\`${e.globalId}\` ${name}${ids}`;
+        }),
+    );
 }
 
 function merge(...arr: WishlistCharacterInternal[][]): WishlistCharacterInternal[] {

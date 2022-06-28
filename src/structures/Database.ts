@@ -7,7 +7,7 @@ import { logger } from '../util';
 export type DatabaseKey = string | number;
 export type DatabaseType = 'wishlist' | 'character';
 
-const directory = join(__dirname, '..', '..', 'data');
+const directory = join(__dirname, '../../data');
 const MAX_BACKUPS = 5;
 
 export abstract class Database<K extends DatabaseKey, V> {

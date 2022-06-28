@@ -11,5 +11,8 @@
     },
     "owner": {
         "clientId": ""
+    },
+    "database": {
+        "uri": ""
     }
 }
