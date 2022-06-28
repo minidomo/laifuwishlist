@@ -19,7 +19,6 @@ const botOwnerCommands = [
     'import',
 ].sort().join(', ');
 
-
 export const data = new SlashCommandBuilder()
     .setName('help')
     .setDescription('Shows all commmands and information about the bot');

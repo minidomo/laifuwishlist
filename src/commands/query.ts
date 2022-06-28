@@ -2,8 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import dayjs from 'dayjs';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
 import { Bounds, CharacterRarityInfo, RarityConstants } from 'laifutil';
-import { character } from '../database';
-import type { CharacterEntry } from '../structures';
+import { Character } from '../model';
 
 export const data = new SlashCommandBuilder()
     .addIntegerOption(option =>
@@ -19,8 +18,8 @@ export async function execute(interaction: CommandInteraction) {
 
     const globalId = options.getInteger('global_id');
     if (typeof globalId === 'number') {
-        const characterInfo = character.query({ globalId });
-        const embed = createCharacterEmbed(characterInfo);
+        const character = (await Character.findOne({ id: globalId }).exec()) as BotTypes.CharacterDocument | null;
+        const embed = createCharacterEmbed(character);
         await interaction.reply({
             embeds: [embed],
         });
@@ -50,36 +49,36 @@ function createRankString(range: Bounds): string {
     return `${lower}・${upper}`;
 }
 
-function createCharacterEmbed(characterInfo: CharacterEntry | null) {
+function createCharacterEmbed(character: BotTypes.CharacterDocument | null) {
     const embed = new MessageEmbed().setColor(0xF0B67F);
 
-    if (characterInfo === null) {
+    if (character === null) {
         embed.setDescription('Could not find character');
     } else {
-        const lastUpdated = dayjs.unix(characterInfo.lastUpdated).format('MM/DD/YYYY, h:mm:ss A');
+        const lastUpdated = dayjs(character.updatedAt).format('M/D/YYYY, h:mm:ss A');
 
         embed
-            .setTitle(characterInfo.characterName)
+            .setTitle(character.name)
             .addField('General',
-                `**Global ID:** ${characterInfo.globalId}\n` +
-                `**Total Images:** ${characterInfo.totalImages}\n` +
-                `**Influence:** ${characterInfo.influence}\n` +
-                `**Rank:** ${createRankString(characterInfo.influenceRankRange)}\n`,
+                `**Global ID:** ${character.id}\n` +
+                `**Total Images:** ${character.totalImages}\n` +
+                `**Influence:** ${character.influence}\n` +
+                `**Rank:** ${createRankString(character.influenceRankRange)}\n`,
                 true)
             .addField('Rarity Burn Rate',
-                `**${RarityConstants.ALPHA.symbol}** ${createRarityString(characterInfo.rarities.alpha)}\n` +
-                `**${RarityConstants.BETA.symbol}** ${createRarityString(characterInfo.rarities.beta)}\n` +
-                `**${RarityConstants.GAMMA.symbol}** ${createRarityString(characterInfo.rarities.gamma)}\n` +
-                `**${RarityConstants.DELTA.symbol}** ${createRarityString(characterInfo.rarities.delta)}\n` +
-                `**${RarityConstants.EPSILON.symbol}** ${createRarityString(characterInfo.rarities.epsilon)}\n` +
-                `**${RarityConstants.ZETA.symbol}** ${createRarityString(characterInfo.rarities.zeta)}\n` +
-                `**${RarityConstants.ULTRA.symbol}** ${createRarityString(characterInfo.rarities.ultra)}\n`,
+                `**${RarityConstants.ALPHA.symbol}** ${createRarityString(character.rarities.alpha)}\n` +
+                `**${RarityConstants.BETA.symbol}** ${createRarityString(character.rarities.beta)}\n` +
+                `**${RarityConstants.GAMMA.symbol}** ${createRarityString(character.rarities.gamma)}\n` +
+                `**${RarityConstants.DELTA.symbol}** ${createRarityString(character.rarities.delta)}\n` +
+                `**${RarityConstants.EPSILON.symbol}** ${createRarityString(character.rarities.epsilon)}\n` +
+                `**${RarityConstants.ZETA.symbol}** ${createRarityString(character.rarities.zeta)}\n` +
+                `**${RarityConstants.ULTRA.symbol}** ${createRarityString(character.rarities.ultra)}\n`,
                 true)
             .addField('Series',
-                `**ENG:** ${characterInfo.series.englishTitle}\n` +
-                `**ALT:** ${characterInfo.series.alternateTitle}\n` +
-                `**Series ID:** ${characterInfo.series.id}\n` +
-                `**Sequence:** \`${characterInfo.series.sequence}\``,
+                `**ENG:** ${character.series.title.english}\n` +
+                `**ALT:** ${character.series.title.alternate}\n` +
+                `**Series ID:** ${character.series.id}\n` +
+                `**Sequence:** \`${character.series.sequence}\``,
                 false)
             .setFooter({
                 text: `Last Updated: ${lastUpdated}`,

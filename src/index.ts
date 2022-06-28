@@ -1,8 +1,15 @@
 import { Client, Intents } from 'discord.js';
+import { connect, connection } from 'mongoose';
 import { commands } from './commands';
-import { token } from './config';
+import { databaseUri, token } from './config';
 import { CheckWishlist, UpdateCharacter } from './plugin';
 import { logger } from './util';
+
+connect(databaseUri);
+
+connection.once('open', () => {
+    logger.info(`Connected to ${databaseUri}`);
+});
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] }) as Client<true>;
 
