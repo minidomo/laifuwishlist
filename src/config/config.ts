@@ -14,5 +14,3 @@ export const guildsIds: string[] = production ? config.prod.guildIds : config.de
 export const clientId: string = production ? config.prod.clientId : config.dev.clientId;
 
 export const ownerClientId: string = config.owner.clientId;
-
-export const databaseUri: string = config.databaseUri;

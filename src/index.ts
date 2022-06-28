@@ -1,7 +1,7 @@
 import { Client, Intents } from 'discord.js';
 import { commands } from './commands';
 import { token } from './config';
-import { CheckWishlist, UpdateDatabase } from './plugin';
+import { CheckWishlist, UpdateCharacter } from './plugin';
 import { logger } from './util';
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] }) as Client<true>;
@@ -11,7 +11,7 @@ client.once('ready', () => {
 });
 
 client.on('messageCreate', message => {
-    UpdateDatabase.run(message);
+    UpdateCharacter.run(message);
     CheckWishlist.run(message);
 });
 
