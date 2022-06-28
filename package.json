@@ -23,7 +23,6 @@
     "discord.js": "^13.8.0",
     "fast-json-stable-stringify": "^2.1.0",
     "laifutil": "^1.1.0",
-    "mongoose": "^6.4.0",
     "winston": "^3.7.2"
   },
   "devDependencies": {

@@ -48,7 +48,7 @@ function interalize(entry: WishlistEntry): WishlistEntryInternal {
     return ret;
 }
 
-function uninteralize(entry: WishlistEntryInternal): WishlistEntry {
+function externalize(entry: WishlistEntryInternal): WishlistEntry {
     const ret: WishlistEntry = {
         userId: entry.userId,
         seriesIds: Array.from(entry.seriesIds),
@@ -104,7 +104,7 @@ export class WishlistDatabase extends Database<UserId, WishlistEntryInternal> {
 
     protected toString(): string {
         const arr: WishlistEntry[] = [];
-        this.storage.forEach(entry => arr.push(uninteralize(entry)));
+        this.storage.forEach(entry => arr.push(externalize(entry)));
         return stringify(arr);
     }
 
@@ -153,10 +153,10 @@ export class WishlistDatabase extends Database<UserId, WishlistEntryInternal> {
                 addCharacter(entry.globalIds, data);
             }
         } else if (typeof data === 'number') {
-                entry.seriesIds.delete(data);
-            } else {
-                removeCharacter(entry.globalIds, data);
-            }
+            entry.seriesIds.delete(data);
+        } else {
+            removeCharacter(entry.globalIds, data);
+        }
     }
 
     search(guildId: string, globalId: number, seriesId: number, imageNumber: number): UserId[] {
