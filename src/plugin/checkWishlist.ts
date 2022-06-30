@@ -9,7 +9,7 @@ import {
     isViewEmbed,
     ViewEmbed,
 } from 'laifutil';
-import { wishlist } from '../database';
+import { User } from '../model';
 
 export async function run(message: Message) {
     if (!message.guild) return;
@@ -28,12 +28,22 @@ export async function run(message: Message) {
         }
 
         if (charEmbed) {
-            const userIds = wishlist.search(
-                message.guild.id,
-                charEmbed.globalId,
-                charEmbed.series.id,
-                charEmbed.image.currentNumber,
-            );
+            const seriesFilter: Record<string, boolean> = {};
+            seriesFilter[`guildIds.${message.guild.id}`] = true;
+            seriesFilter[`seriesIds.${charEmbed.series.id}`] = true;
+
+            const characterFilter: Record<string, boolean | RegExp> = {};
+            characterFilter[`guildIds.${message.guild.id}`] = true;
+            characterFilter[`globalIds.${charEmbed.globalId}`] = new RegExp(`${charEmbed.image.currentNumber}`);
+
+            const seriesUsers = await User.find(seriesFilter, 'id').exec();
+            const characterUsers = await User.find(characterFilter, 'id').exec();
+
+            const userIdSet: Set<string> = new Set();
+            seriesUsers.forEach(e => userIdSet.add(e.id));
+            characterUsers.forEach(e => userIdSet.add(e.id));
+
+            const userIds = Array.from(userIdSet);
 
             if (userIds.length > 0) {
                 const embed = new MessageEmbed()

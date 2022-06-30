@@ -7,10 +7,8 @@ import {
 } from 'discord.js';
 import { cleanCharacterName } from 'laifutil';
 import { MISSING_INFO } from '../constants';
-import { wishlist } from '../database';
-import { Character } from '../model';
-import type { WishlistEntryInternal } from '../structures';
-import { capitalize, CustomId, Pages } from '../util';
+import { Character, User } from '../model';
+import { capitalize, CustomId, Pages, Wishlist } from '../util';
 
 interface CharacterDescriptionInfo {
     id: number;
@@ -54,10 +52,12 @@ export async function execute(interaction: CommandInteraction) {
     const { options, user } = interaction;
     const unique = CustomId.createUnique();
 
+    await interaction.deferReply();
+
     const category = options.getString('category') as Category;
     const targetUser = options.getUser('user') ?? user;
 
-    const entry = wishlist.getUserInfo(targetUser.id);
+    const entry = (await User.findOne({ id: targetUser.id }).exec()) as BotTypes.UserDocument | null;
 
     if (entry) {
         const prevButton = new MessageButton()
@@ -82,7 +82,7 @@ export async function execute(interaction: CommandInteraction) {
             .setDescription(Pages.createDescription(lines, 1, MAX_LINES_PER_PAGE))
             .setFooter({ text: Pages.createFooterText(lines.length, 1, capitalize(category), MAX_LINES_PER_PAGE) });
 
-        await interaction.reply({
+        await interaction.editReply({
             embeds: [embed],
             components: [row],
         });
@@ -106,22 +106,27 @@ export function isPermitted(_interaction: CommandInteraction): boolean {
     return true;
 }
 
-function createLines(category: Category, entry: WishlistEntryInternal): Promise<string[]> {
+function createLines(category: Category, entry: BotTypes.UserDocument): Promise<string[]> {
     const lines = category === 'characters' ? createCharacterLines : createSeriesLines;
     return lines(entry);
 }
 
-async function createCharacterLines(entry: WishlistEntryInternal): Promise<string[]> {
+async function createCharacterLines(entry: BotTypes.UserDocument): Promise<string[]> {
     const arr = await Promise.all(
-        Array.from(entry.globalIds.values())
-            .map(async e => {
+        Array.from(entry.globalIds.keys())
+            .map(async gid => {
+                const imagesStr = entry.globalIds.get(gid) as string;
+                const id = parseInt(gid);
+
                 const character = (
-                    await Character.findOne({ id: e.globalId }).exec()
+                    await Character.findOne({ id }).exec()
                 ) as BotTypes.CharacterDocument | null;
 
+                const images: Set<number> = new Set(Array.from(imagesStr, e => parseInt(e)));
+
                 const temp: CharacterDescriptionInfo = {
-                    id: e.globalId,
-                    images: e.images,
+                    id,
+                    images,
                     character,
                 };
 
@@ -133,7 +138,7 @@ async function createCharacterLines(entry: WishlistEntryInternal): Promise<strin
         .sort((a, b) => a.id - b.id)
         .map(e => {
             let ids = '';
-            if (!wishlist.hasAllImages(e.images)) {
+            if (!Wishlist.hasAllImages(e.images)) {
                 ids = ` \`[${Array.from(e.images).sort().join('')}]\``;
             }
 
@@ -147,10 +152,12 @@ async function createCharacterLines(entry: WishlistEntryInternal): Promise<strin
         });
 }
 
-async function createSeriesLines(entry: WishlistEntryInternal): Promise<string[]> {
+async function createSeriesLines(entry: BotTypes.UserDocument): Promise<string[]> {
     const arr = await Promise.all(
-        Array.from(entry.seriesIds)
-            .map(async id => {
+        Array.from(entry.seriesIds.keys())
+            .map(async sid => {
+                const id = parseInt(sid);
+
                 const character = (
                     await Character.findOne({ 'series.id': id }).exec()
                 ) as BotTypes.CharacterDocument | null;

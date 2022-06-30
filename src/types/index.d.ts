@@ -8,7 +8,10 @@ declare global {
         type CustomId = string;
         type Unique = string;
 
+        type Modification = 'add' | 'remove';
+
         type CharacterDocument = Document & CharacterSchema & Timestamps;
+        type UserDocument = Document & UserSchema & Timestamps;
 
         interface Command {
             data: SlashCommandBuilder;
@@ -67,5 +70,16 @@ declare global {
             updatedAt: string;
         }
 
+        interface UserSchema {
+            id: string;
+            seriesIds: Map<string, boolean>;
+            guildIds: Map<string, boolean>;
+            globalIds: Map<string, string>;
+        }
+
+        interface WishlistCharacter {
+            globalId: number;
+            images: Set<number>;
+        }
     }
 }

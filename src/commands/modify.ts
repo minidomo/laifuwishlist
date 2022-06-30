@@ -11,10 +11,8 @@ import {
 } from 'discord.js';
 import { cleanCharacterName } from 'laifutil';
 import { MISSING_INFO } from '../constants';
-import { wishlist } from '../database';
-import { Character } from '../model';
-import type { Action, WishlistCharacterInternal } from '../structures';
-import { capitalize, CustomId, Pages } from '../util';
+import { Character, User } from '../model';
+import { capitalize, CustomId, Pages, Wishlist } from '../util';
 
 interface CustomIdArgs {
     character?: string;
@@ -26,7 +24,7 @@ interface Args {
     interaction: CommandInteraction;
     unique: string;
     customId: CustomIdArgs;
-    action: Action;
+    action: BotTypes.Modification;
 }
 
 type Category = 'series' | 'characters';
@@ -72,14 +70,16 @@ export async function execute(interaction: CommandInteraction) {
     const { options } = interaction;
     const unique = CustomId.createUnique();
 
-    const action = options.getString('action') as Action;
+    const action = options.getString('action') as BotTypes.Modification;
     const category = options.getString('category') as Category;
 
     const modalCustomId = CustomId.createCustomId(unique, category);
     const customId: CustomIdArgs = {};
 
+    const title = action === 'add' ? 'Add to wishlist' : 'Remove from wishlist';
+
     const modal = new Modal()
-        .setTitle('Add to Wishlist')
+        .setTitle(title)
         .setCustomId(modalCustomId);
 
     const rows = [];
@@ -138,6 +138,25 @@ function handleModal(args: Args) {
 
     interaction.awaitModalSubmit({ filter, time: 30_000 })
         .then(async i => {
+            const userTemp = await User.findOne({ id: i.user.id }).exec();
+            let user: BotTypes.UserDocument;
+
+            if (userTemp) {
+                user = userTemp as BotTypes.UserDocument;
+            } else {
+                const schema: BotTypes.UserSchema = {
+                    id: i.user.id,
+                    seriesIds: {} as Map<string, boolean>,
+                    guildIds: {} as Map<string, boolean>,
+                    globalIds: {} as Map<string, string>,
+                };
+
+                user = new User(schema) as BotTypes.UserDocument;
+            }
+
+            const guild = i.guild as Guild;
+            user.guildIds.set(`${guild.id}`, true);
+
             const category = CustomId.getId(i.customId) as Category;
 
             let lines: string[];
@@ -147,8 +166,28 @@ function handleModal(args: Args) {
 
                 const characters = merge(parseCharacters(characterString), parseWishlistText(wishlistTextString));
 
-                const guild = i.guild as Guild;
-                characters.forEach(e => wishlist.update(action, i.user.id, guild.id, e));
+                characters.forEach(e => {
+                    const id = `${e.globalId}`;
+                    const imagesStr = user.globalIds.get(id);
+                    let newImagesStr = imagesStr ? imagesStr : '';
+
+                    if (action === 'add') {
+                        e.images.forEach(v => {
+                            if (!newImagesStr.includes(`${v}`)) {
+                                newImagesStr += v;
+                            }
+                        });
+                    } else if (imagesStr) {
+                        const arr = Array.from(imagesStr, v => parseInt(v));
+                        newImagesStr = arr.filter(v => !e.images.has(v)).join('');
+                    }
+
+                    if (newImagesStr) {
+                        user.globalIds.set(id, newImagesStr);
+                    } else {
+                        user.globalIds.delete(id);
+                    }
+                });
 
                 lines = await createCharacterLines(characters);
             } else {
@@ -156,11 +195,20 @@ function handleModal(args: Args) {
 
                 const series = parseSeries(seriesString);
 
-                const guild = i.guild as Guild;
-                series.forEach(e => wishlist.update(action, i.user.id, guild.id, e));
+                series.forEach(e => {
+                    const id = `${e}`;
+
+                    if (action === 'add') {
+                        user.seriesIds.set(id, true);
+                    } else {
+                        user.seriesIds.delete(id);
+                    }
+                });
 
                 lines = await createSeriesLines(series);
             }
+
+            await user.save();
 
             const prevButton = new MessageButton()
                 .setStyle('PRIMARY')
@@ -195,7 +243,7 @@ function handleModal(args: Args) {
                 idleTime: 10_000,
             });
         })
-        .catch(() => 0);
+        .catch(console.error);
 }
 
 function parseSeries(str: string): number[] {
@@ -203,7 +251,7 @@ function parseSeries(str: string): number[] {
     return Array.from(new Set(arr)).sort((a, b) => a - b);
 }
 
-function parseCharacters(str: string): WishlistCharacterInternal[] {
+function parseCharacters(str: string): BotTypes.WishlistCharacter[] {
     return str.split(/[\r\n]+/)
         .map(line =>
             line
@@ -224,7 +272,7 @@ function parseCharacters(str: string): WishlistCharacterInternal[] {
                 }
             }
 
-            const obj: WishlistCharacterInternal = {
+            const obj: BotTypes.WishlistCharacter = {
                 globalId: parseInt(parts[0]),
                 images,
             };
@@ -232,7 +280,7 @@ function parseCharacters(str: string): WishlistCharacterInternal[] {
         });
 }
 
-function parseWishlistText(str: string): WishlistCharacterInternal[] {
+function parseWishlistText(str: string): BotTypes.WishlistCharacter[] {
     return str.split(/[\r\n]+/)
         .filter(line => WISHLIST_TEXT_REGEX.test(line))
         .map(line => {
@@ -244,7 +292,7 @@ function parseWishlistText(str: string): WishlistCharacterInternal[] {
                 images.add(i);
             }
 
-            const obj: WishlistCharacterInternal = {
+            const obj: BotTypes.WishlistCharacter = {
                 globalId,
                 images,
             };
@@ -267,7 +315,7 @@ function createSeriesLines(ids: number[]): Promise<string[]> {
     );
 }
 
-function createCharacterLines(characters: WishlistCharacterInternal[]): Promise<string[]> {
+function createCharacterLines(characters: BotTypes.WishlistCharacter[]): Promise<string[]> {
     return Promise.all(
         characters.map(async e => {
             const res = (await Character.findOne({ id: e.globalId }).exec()) as BotTypes.CharacterDocument | null;
@@ -278,7 +326,7 @@ function createCharacterLines(characters: WishlistCharacterInternal[]): Promise<
             }
 
             let ids = '';
-            if (!wishlist.hasAllImages(e.images)) {
+            if (!Wishlist.hasAllImages(e.images)) {
                 ids = ` \`[${Array.from(e.images).sort().join('')}]\``;
             }
 
@@ -287,7 +335,7 @@ function createCharacterLines(characters: WishlistCharacterInternal[]): Promise<
     );
 }
 
-function merge(...arr: WishlistCharacterInternal[][]): WishlistCharacterInternal[] {
+function merge(...arr: BotTypes.WishlistCharacter[][]): BotTypes.WishlistCharacter[] {
     const map: Map<number, Set<number>> = new Map();
 
     arr.forEach(characters => {
@@ -303,7 +351,7 @@ function merge(...arr: WishlistCharacterInternal[][]): WishlistCharacterInternal
 
     return Array.from(map.keys())
         .map(id => {
-            const temp: WishlistCharacterInternal = {
+            const temp: BotTypes.WishlistCharacter = {
                 globalId: id,
                 images: map.get(id) as Set<number>,
             };
