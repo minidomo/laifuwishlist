@@ -8,6 +8,8 @@ declare global {
         type CustomId = string;
         type Unique = string;
 
+        type Modification = 'add' | 'remove';
+
         type CharacterDocument = Document & CharacterSchema & Timestamps;
         type UserDocument = Document & UserSchema & Timestamps;
 
@@ -73,6 +75,11 @@ declare global {
             seriesIds: Map<string, boolean>;
             guildIds: Map<string, boolean>;
             globalIds: Map<string, string>;
+        }
+
+        interface WishlistCharacter {
+            globalId: number;
+            images: Set<number>;
         }
     }
 }

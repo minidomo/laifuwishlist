@@ -12,8 +12,7 @@ import {
 import { cleanCharacterName } from 'laifutil';
 import { MISSING_INFO } from '../constants';
 import { Character, User } from '../model';
-import type { Action, WishlistCharacterInternal } from '../structures';
-import { capitalize, CustomId, logger, Pages, Wishlist } from '../util';
+import { capitalize, CustomId, Pages, Wishlist } from '../util';
 
 interface CustomIdArgs {
     character?: string;
@@ -25,7 +24,7 @@ interface Args {
     interaction: CommandInteraction;
     unique: string;
     customId: CustomIdArgs;
-    action: Action;
+    action: BotTypes.Modification;
 }
 
 type Category = 'series' | 'characters';
@@ -71,7 +70,7 @@ export async function execute(interaction: CommandInteraction) {
     const { options } = interaction;
     const unique = CustomId.createUnique();
 
-    const action = options.getString('action') as Action;
+    const action = options.getString('action') as BotTypes.Modification;
     const category = options.getString('category') as Category;
 
     const modalCustomId = CustomId.createCustomId(unique, category);
@@ -179,9 +178,9 @@ function handleModal(args: Args) {
                             }
                         });
                     } else if (imagesStr) {
-                            const arr = Array.from(imagesStr, v => parseInt(v));
-                            newImagesStr = arr.filter(v => !e.images.has(v)).join('');
-                        }
+                        const arr = Array.from(imagesStr, v => parseInt(v));
+                        newImagesStr = arr.filter(v => !e.images.has(v)).join('');
+                    }
 
                     if (newImagesStr) {
                         user.globalIds.set(id, newImagesStr);
@@ -252,7 +251,7 @@ function parseSeries(str: string): number[] {
     return Array.from(new Set(arr)).sort((a, b) => a - b);
 }
 
-function parseCharacters(str: string): WishlistCharacterInternal[] {
+function parseCharacters(str: string): BotTypes.WishlistCharacter[] {
     return str.split(/[\r\n]+/)
         .map(line =>
             line
@@ -273,7 +272,7 @@ function parseCharacters(str: string): WishlistCharacterInternal[] {
                 }
             }
 
-            const obj: WishlistCharacterInternal = {
+            const obj: BotTypes.WishlistCharacter = {
                 globalId: parseInt(parts[0]),
                 images,
             };
@@ -281,7 +280,7 @@ function parseCharacters(str: string): WishlistCharacterInternal[] {
         });
 }
 
-function parseWishlistText(str: string): WishlistCharacterInternal[] {
+function parseWishlistText(str: string): BotTypes.WishlistCharacter[] {
     return str.split(/[\r\n]+/)
         .filter(line => WISHLIST_TEXT_REGEX.test(line))
         .map(line => {
@@ -293,7 +292,7 @@ function parseWishlistText(str: string): WishlistCharacterInternal[] {
                 images.add(i);
             }
 
-            const obj: WishlistCharacterInternal = {
+            const obj: BotTypes.WishlistCharacter = {
                 globalId,
                 images,
             };
@@ -316,7 +315,7 @@ function createSeriesLines(ids: number[]): Promise<string[]> {
     );
 }
 
-function createCharacterLines(characters: WishlistCharacterInternal[]): Promise<string[]> {
+function createCharacterLines(characters: BotTypes.WishlistCharacter[]): Promise<string[]> {
     return Promise.all(
         characters.map(async e => {
             const res = (await Character.findOne({ id: e.globalId }).exec()) as BotTypes.CharacterDocument | null;
@@ -336,7 +335,7 @@ function createCharacterLines(characters: WishlistCharacterInternal[]): Promise<
     );
 }
 
-function merge(...arr: WishlistCharacterInternal[][]): WishlistCharacterInternal[] {
+function merge(...arr: BotTypes.WishlistCharacter[][]): BotTypes.WishlistCharacter[] {
     const map: Map<number, Set<number>> = new Map();
 
     arr.forEach(characters => {
@@ -352,7 +351,7 @@ function merge(...arr: WishlistCharacterInternal[][]): WishlistCharacterInternal
 
     return Array.from(map.keys())
         .map(id => {
-            const temp: WishlistCharacterInternal = {
+            const temp: BotTypes.WishlistCharacter = {
                 globalId: id,
                 images: map.get(id) as Set<number>,
             };

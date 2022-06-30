@@ -13,12 +13,6 @@ const everyoneCommands = [
     'wishlist',
 ].sort().join(', ');
 
-const botOwnerCommands = [
-    'export',
-    'backup',
-    'import',
-].sort().join(', ');
-
 export const data = new SlashCommandBuilder()
     .setName('help')
     .setDescription('Shows all commmands and information about the bot');
@@ -28,7 +22,6 @@ export async function execute(interaction: CommandInteraction) {
         .setTitle('Help Information')
         .setColor(0xBC96E6)
         .addField('Commands', everyoneCommands)
-        .addField('Bot Owner Commands', botOwnerCommands)
         .setDescription(description)
         .setFooter({ text: 'Developed by JB#9224' });
 
