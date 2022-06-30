@@ -9,6 +9,7 @@ declare global {
         type Unique = string;
 
         type CharacterDocument = Document & CharacterSchema & Timestamps;
+        type UserDocument = Document & UserSchema & Timestamps;
 
         interface Command {
             data: SlashCommandBuilder;
@@ -67,5 +68,11 @@ declare global {
             updatedAt: string;
         }
 
+        interface UserSchema {
+            id: string;
+            seriesIds: Map<string, boolean>;
+            guildIds: Map<string, boolean>;
+            globalIds: Map<string, string>;
+        }
     }
 }

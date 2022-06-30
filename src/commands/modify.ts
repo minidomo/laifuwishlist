@@ -11,10 +11,9 @@ import {
 } from 'discord.js';
 import { cleanCharacterName } from 'laifutil';
 import { MISSING_INFO } from '../constants';
-import { wishlist } from '../database';
-import { Character } from '../model';
+import { Character, User } from '../model';
 import type { Action, WishlistCharacterInternal } from '../structures';
-import { capitalize, CustomId, Pages } from '../util';
+import { capitalize, CustomId, logger, Pages, Wishlist } from '../util';
 
 interface CustomIdArgs {
     character?: string;
@@ -78,8 +77,10 @@ export async function execute(interaction: CommandInteraction) {
     const modalCustomId = CustomId.createCustomId(unique, category);
     const customId: CustomIdArgs = {};
 
+    const title = action === 'add' ? 'Add to wishlist' : 'Remove from wishlist';
+
     const modal = new Modal()
-        .setTitle('Add to Wishlist')
+        .setTitle(title)
         .setCustomId(modalCustomId);
 
     const rows = [];
@@ -138,6 +139,25 @@ function handleModal(args: Args) {
 
     interaction.awaitModalSubmit({ filter, time: 30_000 })
         .then(async i => {
+            const userTemp = await User.findOne({ id: i.user.id }).exec();
+            let user: BotTypes.UserDocument;
+
+            if (userTemp) {
+                user = userTemp as BotTypes.UserDocument;
+            } else {
+                const schema: BotTypes.UserSchema = {
+                    id: i.user.id,
+                    seriesIds: {} as Map<string, boolean>,
+                    guildIds: {} as Map<string, boolean>,
+                    globalIds: {} as Map<string, string>,
+                };
+
+                user = new User(schema) as BotTypes.UserDocument;
+            }
+
+            const guild = i.guild as Guild;
+            user.guildIds.set(`${guild.id}`, true);
+
             const category = CustomId.getId(i.customId) as Category;
 
             let lines: string[];
@@ -147,8 +167,28 @@ function handleModal(args: Args) {
 
                 const characters = merge(parseCharacters(characterString), parseWishlistText(wishlistTextString));
 
-                const guild = i.guild as Guild;
-                characters.forEach(e => wishlist.update(action, i.user.id, guild.id, e));
+                characters.forEach(e => {
+                    const id = `${e.globalId}`;
+                    const imagesStr = user.globalIds.get(id);
+                    let newImagesStr = imagesStr ? imagesStr : '';
+
+                    if (action === 'add') {
+                        e.images.forEach(v => {
+                            if (!newImagesStr.includes(`${v}`)) {
+                                newImagesStr += v;
+                            }
+                        });
+                    } else if (imagesStr) {
+                            const arr = Array.from(imagesStr, v => parseInt(v));
+                            newImagesStr = arr.filter(v => !e.images.has(v)).join('');
+                        }
+
+                    if (newImagesStr) {
+                        user.globalIds.set(id, newImagesStr);
+                    } else {
+                        user.globalIds.delete(id);
+                    }
+                });
 
                 lines = await createCharacterLines(characters);
             } else {
@@ -156,11 +196,20 @@ function handleModal(args: Args) {
 
                 const series = parseSeries(seriesString);
 
-                const guild = i.guild as Guild;
-                series.forEach(e => wishlist.update(action, i.user.id, guild.id, e));
+                series.forEach(e => {
+                    const id = `${e}`;
+
+                    if (action === 'add') {
+                        user.seriesIds.set(id, true);
+                    } else {
+                        user.seriesIds.delete(id);
+                    }
+                });
 
                 lines = await createSeriesLines(series);
             }
+
+            await user.save();
 
             const prevButton = new MessageButton()
                 .setStyle('PRIMARY')
@@ -195,7 +244,7 @@ function handleModal(args: Args) {
                 idleTime: 10_000,
             });
         })
-        .catch(() => 0);
+        .catch(console.error);
 }
 
 function parseSeries(str: string): number[] {
@@ -278,7 +327,7 @@ function createCharacterLines(characters: WishlistCharacterInternal[]): Promise<
             }
 
             let ids = '';
-            if (!wishlist.hasAllImages(e.images)) {
+            if (!Wishlist.hasAllImages(e.images)) {
                 ids = ` \`[${Array.from(e.images).sort().join('')}]\``;
             }
 

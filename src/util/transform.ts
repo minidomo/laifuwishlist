@@ -1,15 +1,11 @@
 import type { InfoEmbed } from 'laifutil';
 
-interface Cloneable {
-    [key: string]: any;
-}
-
 function clone<T>(o: T): T {
-    const ret: Cloneable = {};
+    const ret: Record<string, any> = {};
 
     Object.keys(o)
         .forEach(key => {
-            const obj = o as Cloneable;
+            const obj = o as Record<string, any>;
             ret[key] = typeof obj[key] === 'object' ? clone(obj[key]) : obj[key];
         });
 
