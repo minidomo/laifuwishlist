@@ -36,8 +36,8 @@ export async function run(message: Message) {
             characterFilter[`guildIds.${message.guild.id}`] = true;
             characterFilter[`globalIds.${charEmbed.globalId}`] = new RegExp(`${charEmbed.image.currentNumber}`);
 
-            const seriesUsers = await User.find(seriesFilter, 'id').exec();
-            const characterUsers = await User.find(characterFilter, 'id').exec();
+            const seriesUsers = await User.find(seriesFilter).select('id').lean();
+            const characterUsers = await User.find(characterFilter).select('id').lean();
 
             const userIdSet: Set<string> = new Set();
             seriesUsers.forEach(e => userIdSet.add(e.id));
@@ -49,8 +49,7 @@ export async function run(message: Message) {
                 const embed = new MessageEmbed()
                     .setColor(0xC7EFCF)
                     .setTitle('Users that may be interested')
-                    .setDescription(userIds.map(id => `<@${id}>`).join(' '))
-                    .setFooter({ text: 'Developed by JB#9224' });
+                    .setDescription(userIds.map(id => `<@${id}>`).join(' '));
 
                 await message.reply({ embeds: [embed] });
             }

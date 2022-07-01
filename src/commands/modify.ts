@@ -36,14 +36,8 @@ export const data = new SlashCommandBuilder()
     .addStringOption(option =>
         option
             .setChoices(
-                {
-                    name: 'Add',
-                    value: 'add',
-                },
-                {
-                    name: 'Remove',
-                    value: 'remove',
-                },
+                { name: 'Add', value: 'add' },
+                { name: 'Remove', value: 'remove' },
             )
             .setName('action')
             .setDescription('Action to take')
@@ -51,14 +45,8 @@ export const data = new SlashCommandBuilder()
     .addStringOption(option =>
         option
             .setChoices(
-                {
-                    name: 'Series',
-                    value: 'series',
-                },
-                {
-                    name: 'Characters',
-                    value: 'characters',
-                },
+                { name: 'Series', value: 'series' },
+                { name: 'Characters', value: 'characters' },
             )
             .setName('category')
             .setDescription('The category to display')
@@ -138,7 +126,7 @@ function handleModal(args: Args) {
 
     interaction.awaitModalSubmit({ filter, time: 30_000 })
         .then(async i => {
-            const userTemp = await User.findOne({ id: i.user.id }).exec();
+            const userTemp = await User.findOne({ id: i.user.id });
             let user: BotTypes.UserDocument;
 
             if (userTemp) {
@@ -243,7 +231,7 @@ function handleModal(args: Args) {
                 idleTime: 10_000,
             });
         })
-        .catch(console.error);
+        .catch((console.error));
 }
 
 function parseSeries(str: string): number[] {
@@ -303,7 +291,9 @@ function parseWishlistText(str: string): BotTypes.WishlistCharacter[] {
 function createSeriesLines(ids: number[]): Promise<string[]> {
     return Promise.all(
         ids.map(async id => {
-            const res = (await Character.findOne({ 'series.id': id }).exec()) as BotTypes.CharacterDocument | null;
+            const res = await Character.findOne({ 'series.id': id })
+                .select('series')
+                .lean() as BotTypes.LeanCharacterDocument | null;
 
             let title: string = MISSING_INFO;
             if (res) {
@@ -318,7 +308,9 @@ function createSeriesLines(ids: number[]): Promise<string[]> {
 function createCharacterLines(characters: BotTypes.WishlistCharacter[]): Promise<string[]> {
     return Promise.all(
         characters.map(async e => {
-            const res = (await Character.findOne({ id: e.globalId }).exec()) as BotTypes.CharacterDocument | null;
+            const res = await Character.findOne({ id: e.globalId })
+                .select('name')
+                .lean() as BotTypes.LeanCharacterDocument | null;
 
             let name: string = MISSING_INFO;
             if (res) {

@@ -13,7 +13,7 @@ import { capitalize, CustomId, Pages, Wishlist } from '../util';
 interface CharacterDescriptionInfo {
     id: number;
     images: Set<number>;
-    character: BotTypes.CharacterDocument | null;
+    character: BotTypes.LeanCharacterDocument | null;
 }
 
 interface SeriesDescriptionInfo {
@@ -29,14 +29,8 @@ export const data = new SlashCommandBuilder()
     .addStringOption(option =>
         option
             .setChoices(
-                {
-                    name: 'Series',
-                    value: 'series',
-                },
-                {
-                    name: 'Characters',
-                    value: 'characters',
-                },
+                { name: 'Series', value: 'series' },
+                { name: 'Characters', value: 'characters' },
             )
             .setName('category')
             .setDescription('The category to display')
@@ -57,7 +51,7 @@ export async function execute(interaction: CommandInteraction) {
     const category = options.getString('category') as Category;
     const targetUser = options.getUser('user') ?? user;
 
-    const entry = (await User.findOne({ id: targetUser.id }).exec()) as BotTypes.UserDocument | null;
+    const entry = await User.findOne({ id: targetUser.id }).lean() as BotTypes.LeanUserDocument | null;
 
     if (entry) {
         const prevButton = new MessageButton()
@@ -98,7 +92,7 @@ export async function execute(interaction: CommandInteraction) {
             idleTime: 10_000,
         });
     } else {
-        await interaction.reply({ content: `No wishlist found for ${targetUser.username}` });
+        await interaction.editReply({ content: `No wishlist found for ${targetUser.username}` });
     }
 }
 
@@ -106,21 +100,21 @@ export function isPermitted(_interaction: CommandInteraction): boolean {
     return true;
 }
 
-function createLines(category: Category, entry: BotTypes.UserDocument): Promise<string[]> {
+function createLines(category: Category, entry: BotTypes.LeanUserDocument): Promise<string[]> {
     const lines = category === 'characters' ? createCharacterLines : createSeriesLines;
     return lines(entry);
 }
 
-async function createCharacterLines(entry: BotTypes.UserDocument): Promise<string[]> {
+async function createCharacterLines(entry: BotTypes.LeanUserDocument): Promise<string[]> {
     const arr = await Promise.all(
-        Array.from(entry.globalIds.keys())
+        Array.from(Object.keys(entry.globalIds))
             .map(async gid => {
-                const imagesStr = entry.globalIds.get(gid) as string;
+                const imagesStr = entry.globalIds[gid];
                 const id = parseInt(gid);
 
-                const character = (
-                    await Character.findOne({ id }).exec()
-                ) as BotTypes.CharacterDocument | null;
+                const character = await Character.findOne({ id })
+                    .select('name influence')
+                    .lean() as BotTypes.LeanCharacterDocument | null;
 
                 const images: Set<number> = new Set(Array.from(imagesStr, e => parseInt(e)));
 
@@ -152,15 +146,15 @@ async function createCharacterLines(entry: BotTypes.UserDocument): Promise<strin
         });
 }
 
-async function createSeriesLines(entry: BotTypes.UserDocument): Promise<string[]> {
+async function createSeriesLines(entry: BotTypes.LeanUserDocument): Promise<string[]> {
     const arr = await Promise.all(
-        Array.from(entry.seriesIds.keys())
+        Array.from(Object.keys(entry.seriesIds))
             .map(async sid => {
                 const id = parseInt(sid);
 
-                const character = (
-                    await Character.findOne({ 'series.id': id }).exec()
-                ) as BotTypes.CharacterDocument | null;
+                const character = await Character.findOne({ 'series.id': id })
+                    .select('series')
+                    .lean() as BotTypes.LeanCharacterDocument | null;
 
                 const temp: SeriesDescriptionInfo = {
                     id,

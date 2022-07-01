@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
-import type { Document } from 'mongoose';
+import type { Document, LeanDocument } from 'mongoose';
 
 declare global {
     namespace BotTypes {
@@ -12,6 +12,9 @@ declare global {
 
         type CharacterDocument = Document & CharacterSchema & Timestamps;
         type UserDocument = Document & UserSchema & Timestamps;
+
+        type LeanCharacterDocument = LeanDocument<CharacterSchema> & Timestamps;
+        type LeanUserDocument = LeanDocument<LeanUserSchema> & Timestamps;
 
         interface Command {
             data: SlashCommandBuilder;
@@ -75,6 +78,13 @@ declare global {
             seriesIds: Map<string, boolean>;
             guildIds: Map<string, boolean>;
             globalIds: Map<string, string>;
+        }
+
+        interface LeanUserSchema {
+            id: string;
+            seriesIds: Record<string, boolean>;
+            guildIds: Record<string, boolean>;
+            globalIds: Record<string, string>;
         }
 
         interface WishlistCharacter {
