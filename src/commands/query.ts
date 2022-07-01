@@ -17,16 +17,17 @@ export async function execute(interaction: CommandInteraction) {
     const { options } = interaction;
 
     const globalId = options.getInteger('global_id');
-    if (typeof globalId === 'number') {
-        const character = (await Character.findOne({ id: globalId }).exec()) as BotTypes.CharacterDocument | null;
-        const embed = createCharacterEmbed(character);
-        await interaction.reply({
-            embeds: [embed],
-        });
-    } else {
+
+    if (globalId === null) {
         await interaction.reply({
             content: 'Provide the query with information to get an answer',
             ephemeral: true,
+        });
+    } else {
+        const character = await Character.findOne({ id: globalId }).lean() as BotTypes.LeanCharacterDocument | null;
+        const embed = createCharacterEmbed(character);
+        await interaction.reply({
+            embeds: [embed],
         });
     }
 }
@@ -44,12 +45,10 @@ function createRarityString(rarity: CharacterRarityInfo): string {
 }
 
 function createRankString(range: Bounds): string {
-    const lower = Math.min(range.lower, range.upper);
-    const upper = Math.max(range.lower, range.upper);
-    return `${lower}・${upper}`;
+    return `${range.lower}・${range.upper}`;
 }
 
-function createCharacterEmbed(character: BotTypes.CharacterDocument | null) {
+function createCharacterEmbed(character: BotTypes.LeanCharacterDocument | null) {
     const embed = new MessageEmbed().setColor(0xF0B67F);
 
     if (character === null) {

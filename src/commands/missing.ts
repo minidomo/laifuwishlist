@@ -39,7 +39,7 @@ async function createDescription(maxId: number): Promise<string> {
     const ids: string[] = [];
     let consecutive = 0;
 
-    const characters = (await Character.find({}, 'id').exec()) as BotTypes.CharacterDocument[];
+    const characters = await Character.find({}).select('id').lean() as BotTypes.LeanCharacterDocument[];
     const existingIds: Set<number> = new Set(characters.map(e => e.id));
 
     for (let i = 0; i <= maxId + 1; i++) {
