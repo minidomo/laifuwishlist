@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { inlineCode, SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
 import { Character } from '../model';
 
@@ -45,11 +45,11 @@ async function createDescription(maxId: number): Promise<string> {
     for (let i = 0; i <= maxId + 1; i++) {
         if (existingIds.has(i) || i === maxId + 1) {
             if (consecutive === 1) {
-                ids.push(`\`${i - 1}\``);
+                ids.push(inlineCode(`${i - 1}`));
             } else if (consecutive === 2) {
-                ids.push(`\`${i - 2}\``, `\`${i - 1}\``);
+                ids.push(inlineCode(`${i - 2}`), inlineCode(`${i - 1}`));
             } else if (consecutive > 2) {
-                ids.push(`\`${i - consecutive}-${i - 1}\``);
+                ids.push(inlineCode((`${i - consecutive}-${i - 1}`)));
             }
 
             consecutive = 0;

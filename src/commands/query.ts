@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { bold, inlineCode, SlashCommandBuilder } from '@discordjs/builders';
 import dayjs from 'dayjs';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
 import { Bounds, CharacterRarityInfo, RarityConstants } from 'laifutil';
@@ -41,7 +41,7 @@ function createRarityString(rarity: CharacterRarityInfo): string {
     if (rarity.totalClaimed === 0) {
         burnRate = 0;
     }
-    return `${rarity.existingAmount}・${rarity.totalClaimed} \`(${burnRate.toFixed(0)}%)\``;
+    return `${rarity.existingAmount}・${rarity.totalClaimed} ${inlineCode(`(${burnRate.toFixed(0)}%)`)}`;
 }
 
 function createRankString(range: Bounds): string {
@@ -59,25 +59,25 @@ function createCharacterEmbed(character: BotTypes.LeanCharacterDocument | null) 
         embed
             .setTitle(character.name)
             .addField('General',
-                `**Global ID:** ${character.id}\n` +
-                `**Total Images:** ${character.totalImages}\n` +
-                `**Influence:** ${character.influence}\n` +
-                `**Rank:** ${createRankString(character.influenceRankRange)}\n`,
+                `${bold('Global ID:')} ${character.id}\n${
+                bold('Total Images:')} ${character.totalImages}\n${
+                bold('Influence:')} ${character.influence}\n${
+                bold('Rank:')} ${createRankString(character.influenceRankRange)}\n`,
                 true)
             .addField('Rarity Burn Rate',
-                `**${RarityConstants.ALPHA.symbol}** ${createRarityString(character.rarities.alpha)}\n` +
-                `**${RarityConstants.BETA.symbol}** ${createRarityString(character.rarities.beta)}\n` +
-                `**${RarityConstants.GAMMA.symbol}** ${createRarityString(character.rarities.gamma)}\n` +
-                `**${RarityConstants.DELTA.symbol}** ${createRarityString(character.rarities.delta)}\n` +
-                `**${RarityConstants.EPSILON.symbol}** ${createRarityString(character.rarities.epsilon)}\n` +
-                `**${RarityConstants.ZETA.symbol}** ${createRarityString(character.rarities.zeta)}\n` +
-                `**${RarityConstants.ULTRA.symbol}** ${createRarityString(character.rarities.ultra)}\n`,
+                `${bold(RarityConstants.ALPHA.symbol)} ${createRarityString(character.rarities.alpha)}\n${
+                bold(RarityConstants.BETA.symbol)} ${createRarityString(character.rarities.beta)}\n${
+                bold(RarityConstants.GAMMA.symbol)} ${createRarityString(character.rarities.gamma)}\n${
+                bold(RarityConstants.DELTA.symbol)} ${createRarityString(character.rarities.delta)}\n${
+                bold(RarityConstants.EPSILON.symbol)} ${createRarityString(character.rarities.epsilon)}\n${
+                bold(RarityConstants.ZETA.symbol)} ${createRarityString(character.rarities.zeta)}\n${
+                bold(RarityConstants.ULTRA.symbol)} ${createRarityString(character.rarities.ultra)}\n`,
                 true)
             .addField('Series',
-                `**ENG:** ${character.series.title.english}\n` +
-                `**ALT:** ${character.series.title.alternate}\n` +
-                `**Series ID:** ${character.series.id}\n` +
-                `**Sequence:** \`${character.series.sequence}\``,
+                `${bold('ENG:')} ${character.series.title.english}\n${
+                bold('ALT:')} ${character.series.title.alternate}\n${
+                bold('Series ID:')} ${character.series.id}\n${
+                bold('Sequence:')} ${inlineCode(character.series.sequence)}\n`,
                 false)
             .setFooter({
                 text: `Last Updated: ${lastUpdated}`,
