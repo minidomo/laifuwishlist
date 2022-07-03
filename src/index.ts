@@ -22,6 +22,10 @@ client.on('messageCreate', message => {
     CheckWishlist.run(message);
 });
 
+client.on('messageUpdate', (_oldMessage, newMessage) => {
+    UpdateCharacter.run(newMessage);
+});
+
 client.on('interactionCreate', interaction => {
     if (!interaction.guild) return;
 

@@ -1,4 +1,4 @@
-import type { InfoEmbed } from 'laifutil';
+import type { BaseSimpleCharacter, InfoEmbed } from 'laifutil';
 
 function clone<T>(o: T): T {
     const ret: Record<string, any> = {};
@@ -12,7 +12,7 @@ function clone<T>(o: T): T {
     return ret as T;
 }
 
-export function infoEmbedToCharacterSchema(embed: InfoEmbed): BotTypes.CharacterSchema {
+export function fromInfoEmbed(embed: InfoEmbed): BotTypes.CharacterSchema {
     const ret: BotTypes.CharacterSchema = {
         name: embed.characterName,
         id: embed.globalId,
@@ -31,6 +31,24 @@ export function infoEmbedToCharacterSchema(embed: InfoEmbed): BotTypes.Character
             sequence: embed.series.sequence,
         },
         totalImages: embed.totalImages,
+    };
+
+    return ret;
+}
+
+export function fromSimpleCharacter(embed: BaseSimpleCharacter): BotTypes.PartialCharacterSchema {
+    const ret: BotTypes.PartialCharacterSchema = {
+        name: embed.characterName,
+        id: embed.globalId,
+        influence: embed.influence,
+        series: {
+            title: {
+                alternate: embed.series.alternateTitle,
+                english: embed.series.englishTitle,
+            },
+            id: embed.series.id,
+            sequence: embed.series.sequence,
+        },
     };
 
     return ret;
