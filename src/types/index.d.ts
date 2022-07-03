@@ -68,6 +68,16 @@ declare global {
             totalImages: number;
         }
 
+        interface PartialCharacterSchema {
+            name: string;
+            id: number;
+            influence: number;
+            influenceRankRange?: InfluenceRankRangeSchema;
+            rarities?: RarityInfoCollectionSchema;
+            series: SeriesSchema;
+            totalImages?: number;
+        }
+
         interface Timestamps {
             createdAt: string;
             updatedAt: string;

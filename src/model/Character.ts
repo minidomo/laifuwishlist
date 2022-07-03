@@ -31,14 +31,24 @@ const seriesSchema = new Schema({
     sequence: { type: String, required: true },
 });
 
+const raritiesDefault: BotTypes.RarityInfoCollectionSchema = {
+    alpha: { existingAmount: 0, totalClaimed: 0 },
+    beta: { existingAmount: 0, totalClaimed: 0 },
+    delta: { existingAmount: 0, totalClaimed: 0 },
+    epsilon: { existingAmount: 0, totalClaimed: 0 },
+    gamma: { existingAmount: 0, totalClaimed: 0 },
+    ultra: { existingAmount: 0, totalClaimed: 0 },
+    zeta: { existingAmount: 0, totalClaimed: 0 },
+};
+
 const characterSchema = new Schema({
     name: { type: String, required: true },
     id: { type: Number, required: true },
     influence: { type: Number, required: true },
-    influenceRankRange: { type: influenceRankRangeSchema, required: true },
-    rarities: { type: rarityInfoCollectionSchema, required: true },
+    influenceRankRange: { type: influenceRankRangeSchema, default: { lower: 0, upper: 0 } },
+    rarities: { type: rarityInfoCollectionSchema, default: raritiesDefault },
     series: { type: seriesSchema, required: true },
-    totalImages: { type: Number, required: true },
+    totalImages: { type: Number, default: 0 },
 }, { timestamps: true });
 
 export const Character = model('Character', characterSchema);

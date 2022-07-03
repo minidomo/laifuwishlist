@@ -1,5 +1,5 @@
 export * as CustomId from './customId';
 export * from './logger';
 export * from './string';
-export * as Transform from './transform';
+export * as CharacterSchema from './characterSchema';
 export * from './error';
