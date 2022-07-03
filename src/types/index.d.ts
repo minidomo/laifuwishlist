@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction } from 'discord.js';
+import { CommandInteraction, MessageEmbed, ModalSubmitInteraction } from 'discord.js';
 import type { Document, LeanDocument } from 'mongoose';
 
 declare global {
@@ -10,8 +10,8 @@ declare global {
 
         type Modification = 'add' | 'remove';
 
-        type CharacterDocument = Document & CharacterSchema & Timestamps;
-        type UserDocument = Document & UserSchema & Timestamps;
+        type CharacterDocument = Document<any, any, CharacterSchema> & CharacterSchema & Timestamps;
+        type UserDocument = Document<any, any, UserSchema> & UserSchema & Timestamps;
 
         type LeanCharacterDocument = LeanDocument<CharacterSchema> & Timestamps;
         type LeanUserDocument = LeanDocument<LeanUserSchema> & Timestamps;
@@ -87,9 +87,20 @@ declare global {
             globalIds: Record<string, string>;
         }
 
-        interface WishlistCharacter {
-            globalId: number;
-            images: Set<number>;
+        interface PagesOptions {
+            interaction: CommandInteraction | ModalSubmitInteraction;
+            unique: Unique;
+            lines: string[];
+            itemName: string;
+            embed?: MessageEmbed;
+            linesPerPage?: number;
+            idleTime?: number;
         }
+
+        interface PagesStartOptions {
+            ephemeral?: boolean;
+            deferred?: boolean;
+        }
+
     }
 }

@@ -2,7 +2,7 @@ import { REST } from '@discordjs/rest';
 import { RESTPostAPIApplicationCommandsJSONBody, Routes } from 'discord-api-types/v9';
 import { commands } from './commands';
 import { clientId, guildsIds, token } from './config';
-import { logger } from './util';
+import { handleError, logger } from './util';
 
 const commandsJson: RESTPostAPIApplicationCommandsJSONBody[] = [];
 commands.forEach(command => commandsJson.push(command.data.toJSON()));
@@ -14,5 +14,5 @@ guildsIds.forEach(guildId => {
 
     rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commandsJson })
         .then(() => logger.info(`Successfully reloaded application (/) commands: ${guildId}`))
-        .catch(console.error);
+        .catch(handleError);
 });

@@ -1,29 +1,23 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import {
-    CommandInteraction,
-    MessageActionRow,
-    MessageButton,
-    MessageEmbed,
-} from 'discord.js';
+import { bold, inlineCode, SlashCommandBuilder } from '@discordjs/builders';
+import { CommandInteraction, MessageEmbed } from 'discord.js';
 import { cleanCharacterName } from 'laifutil';
 import { MISSING_INFO } from '../constants';
 import { Character, User } from '../model';
-import { capitalize, CustomId, Pages, Wishlist } from '../util';
+import { Pages } from '../structures';
+import { capitalize, CustomId } from '../util';
 
-interface CharacterDescriptionInfo {
+interface CharacterInfo {
     id: number;
-    images: Set<number>;
+    images: string;
     character: BotTypes.LeanCharacterDocument | null;
 }
 
-interface SeriesDescriptionInfo {
+interface SeriesInfo {
     id: number;
     title: string | null;
 }
 
 type Category = 'series' | 'characters';
-
-const MAX_LINES_PER_PAGE = 20;
 
 export const data = new SlashCommandBuilder()
     .addStringOption(option =>
@@ -43,54 +37,35 @@ export const data = new SlashCommandBuilder()
     .setDescription('Shows a user\'s wishlist');
 
 export async function execute(interaction: CommandInteraction) {
-    const { options, user } = interaction;
     const unique = CustomId.createUnique();
-
     await interaction.deferReply();
+
+    const { options, user } = interaction;
 
     const category = options.getString('category') as Category;
     const targetUser = options.getUser('user') ?? user;
 
-    const entry = await User.findOne({ id: targetUser.id }).lean() as BotTypes.LeanUserDocument | null;
+    const userDoc = await User.findOne({ id: targetUser.id }).lean() as BotTypes.LeanUserDocument | null;
 
-    if (entry) {
-        const prevButton = new MessageButton()
-            .setStyle('PRIMARY')
-            .setCustomId(CustomId.createCustomId(unique, 'prev'))
-            .setLabel('Prev');
-
-        const nextButton = new MessageButton()
-            .setStyle('PRIMARY')
-            .setCustomId(CustomId.createCustomId(unique, 'next'))
-            .setLabel('Next');
-
-        const row = new MessageActionRow().addComponents(prevButton, nextButton);
-        const lines = await createLines(category, entry);
+    if (userDoc) {
+        const lines = await createLines(category, userDoc);
 
         const embed = new MessageEmbed()
             .setColor(0x28C2FF)
             .setAuthor({
                 name: `${targetUser.username}'s Wishlist: ${capitalize(category)}`,
                 iconURL: user.avatarURL() ?? user.defaultAvatarURL,
-            })
-            .setDescription(Pages.createDescription(lines, 1, MAX_LINES_PER_PAGE))
-            .setFooter({ text: Pages.createFooterText(lines.length, 1, capitalize(category), MAX_LINES_PER_PAGE) });
+            });
 
-        await interaction.editReply({
-            embeds: [embed],
-            components: [row],
-        });
-
-        Pages.handle({
+        const pages = new Pages({
             interaction,
-            row,
-            embed,
             unique,
             lines,
             itemName: category,
-            linesPerPage: MAX_LINES_PER_PAGE,
-            idleTime: 10_000,
+            embed,
         });
+
+        pages.start({ deferred: true });
     } else {
         await interaction.editReply({ content: `No wishlist found for ${targetUser.username}` });
     }
@@ -100,75 +75,64 @@ export function isPermitted(_interaction: CommandInteraction): boolean {
     return true;
 }
 
-function createLines(category: Category, entry: BotTypes.LeanUserDocument): Promise<string[]> {
+function createLines(category: Category, user: BotTypes.LeanUserDocument): Promise<string[]> {
     const lines = category === 'characters' ? createCharacterLines : createSeriesLines;
-    return lines(entry);
+    return lines(user);
 }
 
-async function createCharacterLines(entry: BotTypes.LeanUserDocument): Promise<string[]> {
-    const arr = await Promise.all(
-        Array.from(Object.keys(entry.globalIds))
-            .map(async gid => {
-                const imagesStr = entry.globalIds[gid];
-                const id = parseInt(gid);
+async function createCharacterLines(user: BotTypes.LeanUserDocument): Promise<string[]> {
+    const promises = Array.from(Object.keys(user.globalIds))
+        .map(async gid => {
+            const images = user.globalIds[gid];
 
-                const character = await Character.findOne({ id })
-                    .select('name influence')
-                    .lean() as BotTypes.LeanCharacterDocument | null;
+            const id = parseInt(gid);
+            const character = await Character.findOne({ id })
+                .select('name influence')
+                .lean() as BotTypes.LeanCharacterDocument | null;
 
-                const images: Set<number> = new Set(Array.from(imagesStr, e => parseInt(e)));
+            return { id, images, character } as CharacterInfo;
+        });
 
-                const temp: CharacterDescriptionInfo = {
-                    id,
-                    images,
-                    character,
-                };
-
-                return temp;
-            }),
-    );
-
-    return arr
+    const arr = await Promise.all(promises);
+    const ret = arr
         .sort((a, b) => a.id - b.id)
         .map(e => {
-            let ids = '';
-            if (!Wishlist.hasAllImages(e.images)) {
-                ids = ` \`[${Array.from(e.images).sort().join('')}]\``;
-            }
-
+            const ids = e.images.length === 9 ? '' : ` ${e.images}`;
             let characterInfo: string = MISSING_INFO;
+
             if (e.character) {
                 characterInfo = `${cleanCharacterName(e.character.name)}・`
-                    + `**${e.character.influence}** <:inf:755213119055200336>`;
+                    + `${bold(`${e.character.influence}`)} <:inf:755213119055200336>`;
             }
 
-            return `\`${e.id}\` ${characterInfo}${ids}`;
+            return `${inlineCode(`${e.id}${ids}`)} ${characterInfo}`;
         });
+
+    return ret;
 }
 
-async function createSeriesLines(entry: BotTypes.LeanUserDocument): Promise<string[]> {
-    const arr = await Promise.all(
-        Array.from(Object.keys(entry.seriesIds))
-            .map(async sid => {
-                const id = parseInt(sid);
+async function createSeriesLines(user: BotTypes.LeanUserDocument): Promise<string[]> {
+    const promises = Array.from(Object.keys(user.seriesIds))
+        .map(async sid => {
+            const id = parseInt(sid);
 
-                const character = await Character.findOne({ 'series.id': id })
-                    .select('series')
-                    .lean() as BotTypes.LeanCharacterDocument | null;
+            const character = await Character.findOne({ 'series.id': id })
+                .select('series')
+                .lean() as BotTypes.LeanCharacterDocument | null;
 
-                const temp: SeriesDescriptionInfo = {
-                    id,
-                    title: character?.series.title.english ?? null,
-                };
+            return {
+                id,
+                title: character?.series.title.english ?? null,
+            } as SeriesInfo;
+        });
 
-                return temp;
-            }),
-    );
-
-    return arr
+    const arr = await Promise.all(promises);
+    const ret = arr
         .sort((a, b) => a.id - b.id)
         .map(e => {
             const title = e.title ?? MISSING_INFO;
-            return `\`${e.id}\` ${title}`;
+            return `${inlineCode(`${e.id}`)} ${title}`;
         });
+
+    return ret;
 }
