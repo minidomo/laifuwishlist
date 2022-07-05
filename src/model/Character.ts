@@ -41,14 +41,19 @@ const raritiesDefault: BotTypes.RarityInfoCollectionSchema = {
     zeta: { existingAmount: 0, totalClaimed: 0 },
 };
 
+const influenceRankRangeDefault: BotTypes.InfluenceRankRangeSchema = {
+    lower: 0,
+    upper: 0,
+};
+
 const characterSchema = new Schema({
     name: { type: String, required: true },
     id: { type: Number, required: true },
     influence: { type: Number, required: true },
-    influenceRankRange: { type: influenceRankRangeSchema, default: { lower: 0, upper: 0 } },
-    rarities: { type: rarityInfoCollectionSchema, default: raritiesDefault },
     series: { type: seriesSchema, required: true },
-    totalImages: { type: Number, default: 0 },
+    influenceRankRange: { type: influenceRankRangeSchema, required: true, default: influenceRankRangeDefault },
+    rarities: { type: rarityInfoCollectionSchema, required: true, default: raritiesDefault },
+    totalImages: { type: Number, required: true, default: 0 },
 }, { timestamps: true });
 
 export const Character = model('Character', characterSchema);

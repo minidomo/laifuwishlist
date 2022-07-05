@@ -10,22 +10,20 @@ declare global {
 
         type Modification = 'add' | 'remove';
 
-        type CharacterDocument = Document<any, any, CharacterSchema> & CharacterSchema & Timestamps;
-        type UserDocument = Document<any, any, UserSchema> & UserSchema & Timestamps;
-
-        type LeanCharacterDocument = LeanDocument<CharacterSchema> & Timestamps;
-        type LeanUserDocument = LeanDocument<LeanUserSchema> & Timestamps;
-
         interface Command {
             data: SlashCommandBuilder;
             execute: (interaction: CommandInteraction) => Promise<void>;
             isPermitted: (interaction: CommandInteraction) => boolean;
         }
 
-        interface BackupMetadata {
-            filename: string;
-            dateCreated: number;
+        interface Timestamps {
+            createdAt: string;
+            updatedAt: string;
         }
+
+        // Character schema and documents
+        type CharacterDocument = Document<unknown, any, CharacterSchema> & CharacterSchema & Timestamps;
+        type LeanCharacterDocument = LeanDocument<CharacterSchema> & Timestamps;
 
         interface InfluenceRankRangeSchema {
             lower: number;
@@ -58,16 +56,6 @@ declare global {
             sequence: string;
         }
 
-        interface CharacterSchema {
-            name: string;
-            id: number;
-            influence: number;
-            influenceRankRange: InfluenceRankRangeSchema;
-            rarities: RarityInfoCollectionSchema;
-            series: SeriesSchema;
-            totalImages: number;
-        }
-
         interface PartialCharacterSchema {
             name: string;
             id: number;
@@ -78,31 +66,33 @@ declare global {
             totalImages?: number;
         }
 
-        interface Timestamps {
-            createdAt: string;
-            updatedAt: string;
-        }
+        type CharacterSchema = Required<PartialCharacterSchema>
+
+        // User schema and documents
+        type UserDocument = Document<unknown, any, UserSchema> & UserSchema & Timestamps;
+        type LeanUserDocument = LeanDocument<LeanUserSchema> & Timestamps;
 
         interface ReminderSchema {
             drop: boolean;
         }
 
-        interface UserSchema {
+        interface PartialUserSchema {
             id: string;
-            seriesIds: Map<string, boolean>;
-            guildIds: Map<string, boolean>;
-            globalIds: Map<string, string>;
-            reminder: ReminderSchema;
+            seriesIds?: Map<string, boolean>;
+            guildIds?: Map<string, boolean>;
+            globalIds?: Map<string, string>;
+            reminder?: ReminderSchema;
         }
 
-        interface LeanUserSchema {
-            id: string;
+        type UserSchema = Required<PartialUserSchema>
+
+        interface LeanUserSchema extends Omit<UserSchema, 'seriesIds' | 'guildIds' | 'globalIds'> {
             seriesIds: Record<string, boolean>;
             guildIds: Record<string, boolean>;
             globalIds: Record<string, string>;
-            reminder: ReminderSchema;
         }
 
+        // Pages
         interface PagesOptions {
             interaction: CommandInteraction | ModalSubmitInteraction;
             unique: Unique;
