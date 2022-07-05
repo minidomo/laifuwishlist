@@ -1,4 +1,4 @@
-import type { BaseSimpleCharacter, InfoEmbed } from 'laifutil';
+import type { BasePersonalSimpleCharacterEmbed, InfoEmbed } from 'laifutil';
 
 function clone<T>(o: T): T {
     const ret: Record<string, any> = {};
@@ -14,18 +14,15 @@ function clone<T>(o: T): T {
 
 export function fromInfoEmbed(embed: InfoEmbed): BotTypes.CharacterSchema {
     const ret: BotTypes.CharacterSchema = {
-        name: embed.characterName,
+        name: embed.name,
         id: embed.globalId,
         influence: embed.influence,
-        influenceRankRange: {
-            lower: Math.min(embed.influenceRankRange.lower, embed.influenceRankRange.upper),
-            upper: Math.max(embed.influenceRankRange.lower, embed.influenceRankRange.upper),
-        },
+        influenceRankRange: clone(embed.influenceRankRange),
         rarities: clone(embed.rarities),
         series: {
             title: {
-                alternate: embed.series.alternateTitle,
-                english: embed.series.englishTitle,
+                alternate: embed.series.title.alternate,
+                english: embed.series.title.english,
             },
             id: embed.series.id,
             sequence: embed.series.sequence,
@@ -36,15 +33,15 @@ export function fromInfoEmbed(embed: InfoEmbed): BotTypes.CharacterSchema {
     return ret;
 }
 
-export function fromSimpleCharacter(embed: BaseSimpleCharacter): BotTypes.PartialCharacterSchema {
+export function fromSimpleCharacter(embed: BasePersonalSimpleCharacterEmbed): BotTypes.PartialCharacterSchema {
     const ret: BotTypes.PartialCharacterSchema = {
-        name: embed.characterName,
+        name: embed.name,
         id: embed.globalId,
         influence: embed.influence,
         series: {
             title: {
-                alternate: embed.series.alternateTitle,
-                english: embed.series.englishTitle,
+                alternate: embed.series.title.alternate,
+                english: embed.series.title.english,
             },
             id: embed.series.id,
             sequence: embed.series.sequence,

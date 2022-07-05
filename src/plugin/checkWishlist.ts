@@ -1,6 +1,6 @@
 import { Message, MessageEmbed } from 'discord.js';
 import {
-    BaseSimpleCharacter,
+    BasePersonalSimpleCharacterEmbed,
     BurnCharacterEmbed,
     GachaCharacterEmbed,
     isBurnCharacterEmbed,
@@ -17,7 +17,7 @@ export async function run(message: Message) {
     const srcEmbed = message.embeds[0];
 
     if (srcEmbed && isLaifuBot(message)) {
-        let charEmbed: BaseSimpleCharacter | null = null;
+        let charEmbed: BasePersonalSimpleCharacterEmbed | null = null;
 
         if (isGachaCharacterEmbed(srcEmbed)) {
             charEmbed = new GachaCharacterEmbed(srcEmbed);
