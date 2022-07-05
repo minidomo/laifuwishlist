@@ -115,15 +115,7 @@ async function getUser(id: string): Promise<BotTypes.UserDocument> {
         return userTemp as BotTypes.UserDocument;
     }
 
-    const schema: BotTypes.UserSchema = {
-        id,
-        seriesIds: {} as Map<string, boolean>,
-        guildIds: {} as Map<string, boolean>,
-        globalIds: {} as Map<string, string>,
-        reminder: {
-            drop: false,
-        },
-    };
+    const schema: BotTypes.PartialUserSchema = { id };
 
     return new User(schema) as BotTypes.UserDocument;
 }
