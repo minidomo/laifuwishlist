@@ -22,8 +22,9 @@ client.on('messageCreate', message => {
     CheckWishlist.run(message);
 });
 
-client.on('messageUpdate', (_oldMessage, newMessage) => {
+client.on('messageUpdate', (oldMessage, newMessage) => {
     UpdateCharacter.run(newMessage);
+    CheckWishlist.run(newMessage, oldMessage);
 });
 
 client.on('interactionCreate', interaction => {
