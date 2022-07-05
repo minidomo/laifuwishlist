@@ -1,8 +1,9 @@
-import { Message, MessageEmbed } from 'discord.js';
+import { Message, MessageEmbed, PartialMessage } from 'discord.js';
 import {
     BasePersonalSimpleCharacterEmbed,
     BurnCharacterEmbed,
     GachaCharacterEmbed,
+    hasSameImage,
     isBurnCharacterEmbed,
     isGachaCharacterEmbed,
     isLaifuBot,
@@ -11,12 +12,14 @@ import {
 } from 'laifutil';
 import { User } from '../model';
 
-export async function run(message: Message) {
-    if (!message.guild) return;
+export async function run(newMessage: Message | PartialMessage, oldMessage?: Message | PartialMessage) {
+    if (!newMessage.guild) return;
 
-    const srcEmbed = message.embeds[0];
+    const srcEmbed = newMessage.embeds[0];
 
-    if (srcEmbed && isLaifuBot(message)) {
+    if (oldMessage && hasSameImage(srcEmbed, oldMessage.embeds[0])) return;
+
+    if (srcEmbed && isLaifuBot(newMessage)) {
         let charEmbed: BasePersonalSimpleCharacterEmbed | null = null;
 
         if (isGachaCharacterEmbed(srcEmbed)) {
@@ -29,11 +32,11 @@ export async function run(message: Message) {
 
         if (charEmbed) {
             const seriesFilter: Record<string, boolean> = {};
-            seriesFilter[`guildIds.${message.guild.id}`] = true;
+            seriesFilter[`guildIds.${newMessage.guild.id}`] = true;
             seriesFilter[`seriesIds.${charEmbed.series.id}`] = true;
 
             const characterFilter: Record<string, boolean | RegExp> = {};
-            characterFilter[`guildIds.${message.guild.id}`] = true;
+            characterFilter[`guildIds.${newMessage.guild.id}`] = true;
             characterFilter[`globalIds.${charEmbed.globalId}`] = new RegExp(`${charEmbed.image.currentNumber}`);
 
             const seriesUsers = await User.find(seriesFilter).select('id').lean();
@@ -51,7 +54,7 @@ export async function run(message: Message) {
                     .setTitle('Users that may be interested')
                     .setDescription(userIds.map(id => `<@${id}>`).join(' '));
 
-                await message.reply({ embeds: [embed] });
+                await newMessage.reply({ embeds: [embed] });
             }
         }
     }
