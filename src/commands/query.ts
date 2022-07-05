@@ -1,7 +1,7 @@
 import { bold, inlineCode, SlashCommandBuilder } from '@discordjs/builders';
 import dayjs from 'dayjs';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
-import { Bounds, CharacterRarityInfo, RarityConstants } from 'laifutil';
+import { Bounds, RarityStatistics, RarityConstants } from 'laifutil';
 import { Character } from '../model';
 
 export const data = new SlashCommandBuilder()
@@ -36,7 +36,7 @@ export function isPermitted(_interaction: CommandInteraction): boolean {
     return true;
 }
 
-function createRarityString(rarity: CharacterRarityInfo): string {
+function createRarityString(rarity: RarityStatistics): string {
     let burnRate = (rarity.totalClaimed - rarity.existingAmount) / rarity.totalClaimed * 100;
     if (rarity.totalClaimed === 0) {
         burnRate = 0;
@@ -65,13 +65,13 @@ function createCharacterEmbed(character: BotTypes.LeanCharacterDocument | null) 
                 bold('Rank:')} ${createRankString(character.influenceRankRange)}\n`,
                 true)
             .addField('Rarity Burn Rate',
-                `${bold(RarityConstants.ALPHA.symbol)} ${createRarityString(character.rarities.alpha)}\n${
-                bold(RarityConstants.BETA.symbol)} ${createRarityString(character.rarities.beta)}\n${
-                bold(RarityConstants.GAMMA.symbol)} ${createRarityString(character.rarities.gamma)}\n${
-                bold(RarityConstants.DELTA.symbol)} ${createRarityString(character.rarities.delta)}\n${
-                bold(RarityConstants.EPSILON.symbol)} ${createRarityString(character.rarities.epsilon)}\n${
-                bold(RarityConstants.ZETA.symbol)} ${createRarityString(character.rarities.zeta)}\n${
-                bold(RarityConstants.ULTRA.symbol)} ${createRarityString(character.rarities.ultra)}\n`,
+                `${bold(RarityConstants.ALPHA.SYMBOL)} ${createRarityString(character.rarities.alpha)}\n${
+                bold(RarityConstants.BETA.SYMBOL)} ${createRarityString(character.rarities.beta)}\n${
+                bold(RarityConstants.GAMMA.SYMBOL)} ${createRarityString(character.rarities.gamma)}\n${
+                bold(RarityConstants.DELTA.SYMBOL)} ${createRarityString(character.rarities.delta)}\n${
+                bold(RarityConstants.EPSILON.SYMBOL)} ${createRarityString(character.rarities.epsilon)}\n${
+                bold(RarityConstants.ZETA.SYMBOL)} ${createRarityString(character.rarities.zeta)}\n${
+                bold(RarityConstants.ULTRA.SYMBOL)} ${createRarityString(character.rarities.ultra)}\n`,
                 true)
             .addField('Series',
                 `${bold('ENG:')} ${character.series.title.english}\n${
