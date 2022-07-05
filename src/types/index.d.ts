@@ -83,11 +83,16 @@ declare global {
             updatedAt: string;
         }
 
+        interface ReminderSchema {
+            drop: boolean;
+        }
+
         interface UserSchema {
             id: string;
             seriesIds: Map<string, boolean>;
             guildIds: Map<string, boolean>;
             globalIds: Map<string, string>;
+            reminder: ReminderSchema;
         }
 
         interface LeanUserSchema {
@@ -95,6 +100,7 @@ declare global {
             seriesIds: Record<string, boolean>;
             guildIds: Record<string, boolean>;
             globalIds: Record<string, string>;
+            reminder: ReminderSchema;
         }
 
         interface PagesOptions {

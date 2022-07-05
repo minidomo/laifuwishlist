@@ -120,6 +120,9 @@ async function getUser(id: string): Promise<BotTypes.UserDocument> {
         seriesIds: {} as Map<string, boolean>,
         guildIds: {} as Map<string, boolean>,
         globalIds: {} as Map<string, string>,
+        reminder: {
+            drop: false,
+        },
     };
 
     return new User(schema) as BotTypes.UserDocument;
