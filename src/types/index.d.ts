@@ -74,6 +74,7 @@ declare global {
 
         interface ReminderSchema {
             drop: boolean;
+            medal: boolean;
         }
 
         interface PartialUserSchema {

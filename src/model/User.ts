@@ -6,6 +6,7 @@ function createMap() {
 
 const reminderSchema = new Schema({
     drop: { type: Boolean, default: false },
+    medal: { type: Boolean, default: false },
 });
 
 const userSchema = new Schema({
