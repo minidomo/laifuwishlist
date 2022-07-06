@@ -4,7 +4,7 @@
 
 LaifuWishlist is a supplementary Discord bot to [LaifuBot](https://laifubot.fandom.com/wiki/Laifubot_Wiki) to enhance users' gacha experience!
 
-> DISCLAIMER: This bot is not associated or endorsed with any staff or developer of LaifuBot.
+> DISCLAIMER: This bot is not affiliated with LaifuBot.
 
 ## Features
 
