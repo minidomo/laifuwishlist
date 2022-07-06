@@ -3,8 +3,8 @@ import { CommandInteraction, MessageEmbed } from 'discord.js';
 
 const description = [
     'This bot is a custom wishlist container for LaifuBot and an external character database. ',
-    'This is not affiliated with LaifuBot.',
-    `View the source code ${hyperlink('here', 'https://github.com/minidomo/laifuwishlist')}.`,
+    'This is not affiliated with LaifuBot. ',
+    `\n\n${hyperlink('Source Code', 'https://github.com/minidomo/laifuwishlist')}`,
 ].join('');
 
 const everyoneCommands = [
