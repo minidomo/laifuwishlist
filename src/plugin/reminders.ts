@@ -23,7 +23,7 @@ export async function run(message: Message) {
             }
         } else if (isMedalDropActiveEmbed(srcEmbed)) {
             const filter: Record<string, any> = {};
-            filter[`globalIds.${message.guild.id}`] = true;
+            filter[`guildIds.${message.guild.id}`] = true;
             filter['reminder.medal'] = true;
 
             const users = await User.find(filter).select('id').lean();
