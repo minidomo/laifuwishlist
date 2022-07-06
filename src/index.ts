@@ -2,7 +2,7 @@ import { Client, Intents } from 'discord.js';
 import { connect, connection } from 'mongoose';
 import { commands } from './commands';
 import { databaseUri, token } from './config';
-import { CheckWishlist, UpdateCharacter } from './plugin';
+import { CheckWishlist, Reminders, UpdateCharacter } from './plugin';
 import { logger } from './util';
 
 connect(databaseUri);
@@ -20,6 +20,7 @@ client.once('ready', () => {
 client.on('messageCreate', message => {
     UpdateCharacter.run(message);
     CheckWishlist.run(message);
+    Reminders.run(message);
 });
 
 client.on('messageUpdate', (oldMessage, newMessage) => {
