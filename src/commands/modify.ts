@@ -10,7 +10,7 @@ import {
 } from 'discord.js';
 import { cleanCharacterName } from 'laifutil';
 import { MISSING_INFO } from '../constants';
-import { Character, User } from '../model';
+import { Character } from '../model';
 import { Pages } from '../structures';
 import { CustomId, findUser, handleError } from '../util';
 
