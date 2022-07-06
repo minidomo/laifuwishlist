@@ -1,15 +1,19 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { hyperlink, SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
 
-const description = 'This bot is a custom wishlist container for LaifuBot and an external character database. '
-    + 'This is not affiliated with LaifuBot.';
+const description = [
+    'This bot is a custom wishlist container for LaifuBot and an external character database. ',
+    'This is not affiliated with LaifuBot.',
+    `View the source code ${hyperlink('here', 'https://github.com/minidomo/laifuwishlist')}.`,
+].join('');
 
 const everyoneCommands = [
-    'modfy',
+    'modify',
     'help',
     'missing',
     'ping',
     'query',
+    'reminder',
     'wishlist',
 ].sort().join(', ');
 
