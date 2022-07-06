@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction, MessageEmbed, ModalSubmitInteraction } from 'discord.js';
-import type { Document, LeanDocument } from 'mongoose';
+import type { Document, LeanDocument, Types } from 'mongoose';
 
 declare global {
     namespace BotTypes {
@@ -17,13 +17,13 @@ declare global {
         }
 
         interface Timestamps {
-            createdAt: string;
-            updatedAt: string;
+            createdAt: Date;
+            updatedAt: Date;
         }
 
         // Character schema and documents
-        type CharacterDocument = Document<unknown, any, CharacterSchema> & CharacterSchema & Timestamps;
-        type LeanCharacterDocument = LeanDocument<CharacterSchema> & Timestamps;
+        type CharacterDocument = Document<unknown, any, CharacterSchema> & CharacterSchema;
+        type LeanCharacterDocument = LeanDocument<CharacterSchema>;
 
         interface InfluenceRankRangeSchema {
             lower: number;
@@ -56,7 +56,7 @@ declare global {
             sequence: string;
         }
 
-        interface PartialCharacterSchema {
+        interface PartialCharacterSchema extends Partial<Timestamps> {
             name: string;
             id: number;
             influence: number;
@@ -77,7 +77,7 @@ declare global {
             medal: boolean;
         }
 
-        interface PartialUserSchema {
+        interface PartialUserSchema extends Partial<Timestamps> {
             id: string;
             seriesIds?: Map<string, boolean>;
             guildIds?: Map<string, boolean>;

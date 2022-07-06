@@ -12,8 +12,8 @@ function clone<T>(o: T): T {
     return ret as T;
 }
 
-export function fromInfoEmbed(embed: InfoEmbed): BotTypes.CharacterSchema {
-    const ret: BotTypes.CharacterSchema = {
+export function fromInfoEmbed(embed: InfoEmbed): BotTypes.PartialCharacterSchema {
+    return {
         name: embed.name,
         id: embed.globalId,
         influence: embed.influence,
@@ -29,12 +29,10 @@ export function fromInfoEmbed(embed: InfoEmbed): BotTypes.CharacterSchema {
         },
         totalImages: embed.totalImages,
     };
-
-    return ret;
 }
 
 export function fromSimpleCharacter(embed: BasePersonalSimpleCharacterEmbed): BotTypes.PartialCharacterSchema {
-    const ret: BotTypes.PartialCharacterSchema = {
+    return {
         name: embed.name,
         id: embed.globalId,
         influence: embed.influence,
@@ -47,6 +45,4 @@ export function fromSimpleCharacter(embed: BasePersonalSimpleCharacterEmbed): Bo
             sequence: embed.series.sequence,
         },
     };
-
-    return ret;
 }
