@@ -3,10 +3,12 @@ import * as missing from './missing';
 import * as modify from './modify';
 import * as ping from './ping';
 import * as query from './query';
+import * as reminder from './reminder';
 import * as wishlist from './wishlist';
 
 export const commands: Map<string, BotTypes.Command> = new Map();
 commands
+    .set(reminder.data.name, reminder)
     .set(modify.data.name, modify)
     .set(help.data.name, help)
     .set(missing.data.name, missing)
