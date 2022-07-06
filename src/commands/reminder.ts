@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import type { CommandInteraction } from 'discord.js';
 import { findUser } from '../util';
 
-type ReminderType = 'drop';
+type ReminderType = 'drop' | 'medal';
 type Toggle = 'on' | 'off';
 
 export const data = new SlashCommandBuilder()
@@ -12,6 +12,7 @@ export const data = new SlashCommandBuilder()
             .setDescription('Type of reminder')
             .setChoices(
                 { name: 'Drop', value: 'drop' },
+                { name: 'Medal', value: 'medal' },
             )
             .setRequired(true))
     .addStringOption(option =>
@@ -32,12 +33,12 @@ export async function execute(interaction: CommandInteraction) {
     const reminderType = options.getString('type') as ReminderType;
     const toggle = options.getString('toggle') as Toggle;
 
+    const targetUser = await findUser(user.id);
+    const toggleOn = toggle === 'on';
+
     let content = '';
 
     if (reminderType === 'drop') {
-        const targetUser = await findUser(user.id);
-        const toggleOn = toggle === 'on';
-
         if (toggleOn) {
             content = 'You will now be pinged for drops';
         } else {
@@ -46,6 +47,17 @@ export async function execute(interaction: CommandInteraction) {
 
         if (targetUser.reminder.drop !== toggleOn) {
             targetUser.reminder.drop = toggleOn;
+            await targetUser.save();
+        }
+    } else {
+        if (toggleOn) {
+            content = 'You will now be pinged for medal drops';
+        } else {
+            content = 'You will no longer be pinged for medal drops';
+        }
+
+        if (targetUser.reminder.medal !== toggleOn) {
+            targetUser.reminder.medal = toggleOn;
             await targetUser.save();
         }
     }
