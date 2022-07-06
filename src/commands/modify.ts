@@ -12,7 +12,7 @@ import { cleanCharacterName } from 'laifutil';
 import { MISSING_INFO } from '../constants';
 import { Character, User } from '../model';
 import { Pages } from '../structures';
-import { CustomId, handleError } from '../util';
+import { CustomId, findUser, handleError } from '../util';
 
 type Category = 'series' | 'characters';
 
@@ -108,18 +108,6 @@ function createModal(unique: BotTypes.Unique, action: BotTypes.Modification, cat
     return modal;
 }
 
-async function getUser(id: string): Promise<BotTypes.UserDocument> {
-    const userTemp = await User.findOne({ id });
-
-    if (userTemp) {
-        return userTemp as BotTypes.UserDocument;
-    }
-
-    const schema: BotTypes.PartialUserSchema = { id };
-
-    return new User(schema) as BotTypes.UserDocument;
-}
-
 function handleModal(args: Args) {
     const { interaction, unique, action, category } = args;
 
@@ -129,7 +117,7 @@ function handleModal(args: Args) {
 
     interaction.awaitModalSubmit({ filter, time: 30_000 })
         .then(async i => {
-            const user = await getUser(i.user.id);
+            const user = await findUser(i.user.id);
 
             const guild = i.guild as Guild;
             user.guildIds.set(`${guild.id}`, true);
