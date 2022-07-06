@@ -2,7 +2,7 @@
 
 ## About
 
-LaifuWishlist is a supplementary Discord bot to [LaifuBot](https://laifubot.fandom.com/wiki/Laifubot_Wiki) to enhance users' gacha experience!
+LaifuWishlist is a supplementary Discord bot to [LaifuBot](https://laifubot.fandom.com/wiki/Laifubot_Wiki) to enhance the gacha experience!
 
 > DISCLAIMER: This bot is not affiliated with LaifuBot.
 
@@ -38,6 +38,12 @@ Start a MongoDB local instance in a separate terminal.
 
 ```sh
 mongod
+```
+
+Deploy commands to your bot.
+
+```sh
+npm run deploy:commands -- --prod
 ```
 
 Start the bot.
