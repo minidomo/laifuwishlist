@@ -5,7 +5,8 @@ export const data = new SlashCommandBuilder()
     .setName('ping')
     .setDescription('Replies with pong');
 
-export async function execute(interaction: CommandInteraction) {
+// eslint-disable-next-line
+export async function execute(interaction: CommandInteraction, _unique: BotTypes.Unique) {
     const embed = new MessageEmbed()
         .setDescription(`Pong ${interaction.user}!`);
 
@@ -15,6 +16,7 @@ export async function execute(interaction: CommandInteraction) {
     });
 }
 
+// eslint-disable-next-line
 export function isPermitted(_interaction: CommandInteraction): boolean {
     return true;
 }

@@ -6,7 +6,8 @@ export const data = new SlashCommandSubcommandBuilder()
     .setName('toggle')
     .setDescription('Enable/disable tracking history of your gachas');
 
-export async function execute(interaction: CommandInteraction) {
+// eslint-disable-next-line
+export async function execute(interaction: CommandInteraction, _unique: BotTypes.Unique) {
     const { user } = interaction;
 
     const targetUser = await findUser(user.id);
@@ -19,6 +20,7 @@ export async function execute(interaction: CommandInteraction) {
     });
 }
 
+// eslint-disable-next-line
 export function isPermitted(_interaction: CommandInteraction) {
     return true;
 }

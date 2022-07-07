@@ -1,11 +1,13 @@
 import type { BasePersonalSimpleCharacterEmbed, InfoEmbed } from 'laifutil';
 
+type CloneableObject = Record<string, any>; // eslint-disable-line
+
 function clone<T>(o: T): T {
-    const ret: Record<string, any> = {};
+    const ret: CloneableObject = {};
 
     Object.keys(o)
         .forEach(key => {
-            const obj = o as Record<string, any>;
+            const obj = o as CloneableObject;
             ret[key] = typeof obj[key] === 'object' ? clone(obj[key]) : obj[key];
         });
 

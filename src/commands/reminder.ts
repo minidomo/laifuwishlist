@@ -27,7 +27,8 @@ export const data = new SlashCommandBuilder()
     .setName('reminder')
     .setDescription('Enable/disable reminders');
 
-export async function execute(interaction: CommandInteraction) {
+// eslint-disable-next-line
+export async function execute(interaction: CommandInteraction, _unique: BotTypes.Unique) {
     const { options, user } = interaction;
 
     const reminderType = options.getString('type') as ReminderType;
@@ -65,6 +66,7 @@ export async function execute(interaction: CommandInteraction) {
     await interaction.reply({ content, ephemeral: true });
 }
 
+// eslint-disable-next-line
 export function isPermitted(_interaction: CommandInteraction): boolean {
     return true;
 }

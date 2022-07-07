@@ -14,17 +14,14 @@ declare global {
 
         type Modification = 'add' | 'remove';
 
-        interface Command {
-            data: SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder;
-            execute: (interaction: CommandInteraction) => Promise<void>;
+        interface BaseCommand<T> {
+            data: T;
+            execute: (interaction: CommandInteraction, unique: Unique) => Promise<void>;
             isPermitted: (interaction: CommandInteraction) => boolean;
         }
 
-        interface Subcommand {
-            data: SlashCommandSubcommandBuilder;
-            execute: (interaction: CommandInteraction) => Promise<void>;
-            isPermitted: (interaction: CommandInteraction) => boolean;
-        }
+        type Command = BaseCommand<SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder>;
+        type Subcommand = BaseCommand<SlashCommandSubcommandBuilder>;
 
         interface MongoTimestamps {
             createdAt: Date;
@@ -32,7 +29,8 @@ declare global {
         }
 
         // Character schema and documents
-        type CharacterDocument = Document<unknown, any, CharacterSchema> & CharacterSchema;
+
+        type CharacterDocument = Document<unknown, any, CharacterSchema> & CharacterSchema; // eslint-disable-line
         type LeanCharacterDocument = LeanDocument<CharacterSchema>;
 
         interface InfluenceRankRangeSchema {
@@ -79,7 +77,7 @@ declare global {
         type CharacterSchema = Required<PartialCharacterSchema>
 
         // User schema and documents
-        type UserDocument = Document<unknown, any, UserSchema> & UserSchema & MongoTimestamps;
+        type UserDocument = Document<unknown, any, UserSchema> & UserSchema & MongoTimestamps; // eslint-disable-line
         type LeanUserDocument = LeanDocument<LeanUserSchema> & MongoTimestamps;
 
         type GachaType = 'badge' | 'character';
