@@ -15,6 +15,7 @@ const gachaResultSchema = new Schema({
     globalId: { type: Number },
     uniqueId: { type: Number },
     rarity: { type: String },
+    image: { type: Number },
     tier: { type: Number },
     badgeId: { type: Number },
 }, { timestamps: true });

@@ -21,6 +21,7 @@ export async function run(newMessage: Message | PartialMessage, oldMessage: Mess
                 globalId: embed.globalId,
                 uniqueId: embed.uniqueId,
                 rarity: embed.rarity.SYMBOL,
+                image: embed.image.currentNumber,
             };
 
             user.gachaHistory.history.push(schemaData);

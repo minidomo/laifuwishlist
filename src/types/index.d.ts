@@ -91,6 +91,7 @@ declare global {
             globalId: number;
             uniqueId: number;
             rarity: string;
+            image: number;
         }
 
         interface BaseGachaResultSchema extends
