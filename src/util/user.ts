@@ -7,5 +7,8 @@ export async function findUser(id: string): Promise<BotTypes.UserDocument> {
         return userTemp as BotTypes.UserDocument;
     }
 
-    return new User({ id }) as BotTypes.UserDocument;
+    const user = new User({ id }) as BotTypes.UserDocument;
+    await user.save();
+
+    return user;
 }

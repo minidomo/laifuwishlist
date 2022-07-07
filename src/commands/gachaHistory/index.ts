@@ -1,12 +1,15 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import type { CommandInteraction } from 'discord.js';
+import * as show from './subcommands/show';
 import * as toggle from './subcommands/toggle';
 
 const subcommands: Map<string, BotTypes.Subcommand> = new Map();
 subcommands
+    .set(show.data.name, show)
     .set(toggle.data.name, toggle);
 
 export const data = new SlashCommandBuilder()
+    .addSubcommand(show.data)
     .addSubcommand(toggle.data)
     .setName('gachahistory')
     .setDescription('Track your gachas');
