@@ -132,8 +132,11 @@ function createLines(arr: GachaResult[]): string[] {
                     + `${bold(`${e.character.influence}`)} <:inf:755213119055200336>`;
             }
 
-            return `${e.result.uniqueId} [${e.result.rarity}] ${characterInfo} `
-                + `${inlineCode(`(${e.result.globalId})`)}・${time(e.result.createdAt, 'f')}`;
+            // TODO delete later
+            const image = e.result.image ?? '?';
+
+            return `${e.result.uniqueId} [${e.result.rarity}] #${image} ${characterInfo} `
+                + `${inlineCode(`(${e.result.globalId})`)}・${time(e.result.createdAt, 'R')}`;
         } else if (isGachaResultBadgeSchema(e.result)) {
             return italic('BADGE SUPPORT WIP');
         } else {
