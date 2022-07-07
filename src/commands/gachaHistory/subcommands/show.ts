@@ -15,6 +15,10 @@ interface GachaResult {
 type SortOption = 'top_influence' | 'low_influence';
 
 export const data = new SlashCommandSubcommandBuilder()
+    .addIntegerOption(option =>
+        option
+            .setName('page')
+            .setDescription('The page to start on'))
     .addStringOption(option =>
         option
             .setChoices(
@@ -32,6 +36,7 @@ export async function execute(interaction: CommandInteraction, unique: BotTypes.
 
     const { options, user } = interaction;
 
+    const pageNumber = options.getInteger('page') ?? undefined;
     const sortOption = options.getString('sort') as SortOption | null;
 
     const targetUser = await User.findOne({ id: user.id })
@@ -55,7 +60,7 @@ export async function execute(interaction: CommandInteraction, unique: BotTypes.
             embed,
         });
 
-        pages.start({ deferred: true });
+        pages.start({ deferred: true, page: pageNumber });
     } else {
         await interaction.editReply({ content: `Could not find gacha history for ${user.username}` });
     }

@@ -144,6 +144,7 @@ declare global {
         }
 
         interface PagesStartOptions {
+            page?: number;
             ephemeral?: boolean;
             deferred?: boolean;
         }
