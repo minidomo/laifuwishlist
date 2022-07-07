@@ -1,6 +1,10 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import {
+    SlashCommandBuilder,
+    SlashCommandSubcommandBuilder,
+    SlashCommandSubcommandsOnlyBuilder,
+} from '@discordjs/builders';
 import { CommandInteraction, MessageEmbed, ModalSubmitInteraction } from 'discord.js';
-import type { Document, LeanDocument, Types } from 'mongoose';
+import type { Document, LeanDocument } from 'mongoose';
 
 declare global {
     namespace BotTypes {
@@ -11,7 +15,13 @@ declare global {
         type Modification = 'add' | 'remove';
 
         interface Command {
-            data: SlashCommandBuilder;
+            data: SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder;
+            execute: (interaction: CommandInteraction) => Promise<void>;
+            isPermitted: (interaction: CommandInteraction) => boolean;
+        }
+
+        interface Subcommand {
+            data: SlashCommandSubcommandBuilder;
             execute: (interaction: CommandInteraction) => Promise<void>;
             isPermitted: (interaction: CommandInteraction) => boolean;
         }
