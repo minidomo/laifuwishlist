@@ -1,4 +1,8 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import {
+    SlashCommandBuilder,
+    SlashCommandSubcommandBuilder,
+    SlashCommandSubcommandsOnlyBuilder,
+} from '@discordjs/builders';
 import { CommandInteraction, MessageEmbed, ModalSubmitInteraction } from 'discord.js';
 import type { Document, LeanDocument } from 'mongoose';
 
@@ -10,20 +14,24 @@ declare global {
 
         type Modification = 'add' | 'remove';
 
-        interface Command {
-            data: SlashCommandBuilder;
-            execute: (interaction: CommandInteraction) => Promise<void>;
+        interface BaseCommand<T> {
+            data: T;
+            execute: (interaction: CommandInteraction, unique: Unique) => Promise<void>;
             isPermitted: (interaction: CommandInteraction) => boolean;
         }
 
-        interface Timestamps {
-            createdAt: string;
-            updatedAt: string;
+        type Command = BaseCommand<SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder>;
+        type Subcommand = BaseCommand<SlashCommandSubcommandBuilder>;
+
+        interface MongoTimestamps {
+            createdAt: Date;
+            updatedAt: Date;
         }
 
         // Character schema and documents
-        type CharacterDocument = Document<unknown, any, CharacterSchema> & CharacterSchema & Timestamps;
-        type LeanCharacterDocument = LeanDocument<CharacterSchema> & Timestamps;
+
+        type CharacterDocument = Document<unknown, any, CharacterSchema> & CharacterSchema; // eslint-disable-line
+        type LeanCharacterDocument = LeanDocument<CharacterSchema>;
 
         interface InfluenceRankRangeSchema {
             lower: number;
@@ -56,7 +64,7 @@ declare global {
             sequence: string;
         }
 
-        interface PartialCharacterSchema {
+        interface PartialCharacterSchema extends Partial<MongoTimestamps> {
             name: string;
             id: number;
             influence: number;
@@ -69,20 +77,50 @@ declare global {
         type CharacterSchema = Required<PartialCharacterSchema>
 
         // User schema and documents
-        type UserDocument = Document<unknown, any, UserSchema> & UserSchema & Timestamps;
-        type LeanUserDocument = LeanDocument<LeanUserSchema> & Timestamps;
+        type UserDocument = Document<unknown, any, UserSchema> & UserSchema & MongoTimestamps; // eslint-disable-line
+        type LeanUserDocument = LeanDocument<LeanUserSchema> & MongoTimestamps;
+
+        type GachaType = 'badge' | 'character';
+
+        interface GachaResultBadgeSchema {
+            tier: number;
+            badgeId: number;
+        }
+
+        interface GachaResultCharacterSchema {
+            globalId: number;
+            uniqueId: number;
+            rarity: string;
+        }
+
+        interface BaseGachaResultSchema extends
+            Partial<GachaResultCharacterSchema>,
+            Partial<GachaResultBadgeSchema> {
+            gachaType: GachaType;
+            stonesUsed: number;
+        }
+
+        type PartialGachaResultSchema = BaseGachaResultSchema & Partial<MongoTimestamps>;
+
+        type GachaResultSchema = BaseGachaResultSchema & MongoTimestamps;
+
+        interface GachaHistorySchema {
+            enabled: boolean;
+            history: GachaResultSchema[];
+        }
 
         interface ReminderSchema {
             drop: boolean;
             medal: boolean;
         }
 
-        interface PartialUserSchema {
+        interface PartialUserSchema extends Partial<MongoTimestamps> {
             id: string;
             seriesIds?: Map<string, boolean>;
             guildIds?: Map<string, boolean>;
             globalIds?: Map<string, string>;
             reminder?: ReminderSchema;
+            gachaHistory?: GachaHistorySchema;
         }
 
         type UserSchema = Required<PartialUserSchema>

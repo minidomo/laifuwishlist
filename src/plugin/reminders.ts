@@ -22,7 +22,7 @@ export async function run(message: Message) {
                 message.reply({ content });
             }
         } else if (isMedalDropActiveEmbed(srcEmbed)) {
-            const filter: Record<string, any> = {};
+            const filter: Record<string, boolean> = {};
             filter[`guildIds.${message.guild.id}`] = true;
             filter['reminder.medal'] = true;
 

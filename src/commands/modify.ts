@@ -59,9 +59,7 @@ export const data = new SlashCommandBuilder()
     .setName('modify')
     .setDescription('Add or remove characters or series to your wishlist');
 
-export async function execute(interaction: CommandInteraction) {
-    const unique = CustomId.createUnique();
-
+export async function execute(interaction: CommandInteraction, unique: BotTypes.Unique) {
     const { options } = interaction;
 
     const action = options.getString('action') as BotTypes.Modification;
@@ -73,6 +71,7 @@ export async function execute(interaction: CommandInteraction) {
     handleModal({ interaction, unique, action, category });
 }
 
+// eslint-disable-next-line
 export function isPermitted(_interaction: CommandInteraction): boolean {
     return true;
 }

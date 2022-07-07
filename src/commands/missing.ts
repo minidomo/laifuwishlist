@@ -13,7 +13,8 @@ export const data = new SlashCommandBuilder()
     .setName('missing')
     .setDescription('Shows the global IDs that are missing in the database');
 
-export async function execute(interaction: CommandInteraction) {
+// eslint-disable-next-line
+export async function execute(interaction: CommandInteraction, _unique: BotTypes.Unique) {
     const { options } = interaction;
 
     await interaction.deferReply();
@@ -31,6 +32,7 @@ export async function execute(interaction: CommandInteraction) {
     });
 }
 
+// eslint-disable-next-line
 export function isPermitted(_interaction: CommandInteraction): boolean {
     return true;
 }

@@ -13,7 +13,8 @@ export const data = new SlashCommandBuilder()
     .setName('query')
     .setDescription('Query a character from the database.');
 
-export async function execute(interaction: CommandInteraction) {
+// eslint-disable-next-line
+export async function execute(interaction: CommandInteraction, _unique: BotTypes.Unique) {
     const { options } = interaction;
 
     const globalId = options.getInteger('global_id');
@@ -32,6 +33,7 @@ export async function execute(interaction: CommandInteraction) {
     }
 }
 
+// eslint-disable-next-line
 export function isPermitted(_interaction: CommandInteraction): boolean {
     return true;
 }

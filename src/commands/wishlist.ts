@@ -4,7 +4,7 @@ import { cleanCharacterName } from 'laifutil';
 import { MISSING_INFO } from '../constants';
 import { Character, User } from '../model';
 import { Pages } from '../structures';
-import { capitalize, CustomId } from '../util';
+import { capitalize } from '../util';
 
 interface CharacterInfo {
     id: number;
@@ -36,8 +36,7 @@ export const data = new SlashCommandBuilder()
     .setName('wishlist')
     .setDescription('Shows a user\'s wishlist');
 
-export async function execute(interaction: CommandInteraction) {
-    const unique = CustomId.createUnique();
+export async function execute(interaction: CommandInteraction, unique: BotTypes.Unique) {
     await interaction.deferReply();
 
     const { options, user } = interaction;
@@ -71,6 +70,7 @@ export async function execute(interaction: CommandInteraction) {
     }
 }
 
+// eslint-disable-next-line
 export function isPermitted(_interaction: CommandInteraction): boolean {
     return true;
 }
