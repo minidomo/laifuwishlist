@@ -15,6 +15,7 @@ const everyoneCommands = [
     'query',
     'reminder',
     'wishlist',
+    'gachahistory toggle',
 ].sort().join(', ');
 
 export const data = new SlashCommandBuilder()

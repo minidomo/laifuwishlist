@@ -16,8 +16,9 @@ export async function run(newMessage: Message | PartialMessage, oldMessage?: Mes
     if (!newMessage.guild) return;
 
     const srcEmbed = newMessage.embeds[0];
+    const oldEmbed = oldMessage?.embeds[0];
 
-    if (oldMessage && oldMessage.embeds[0] && hasSameImage(srcEmbed, oldMessage.embeds[0])) return;
+    if (srcEmbed && oldEmbed && hasSameImage(srcEmbed, oldEmbed)) return;
 
     if (srcEmbed && isLaifuBot(newMessage)) {
         let charEmbed: BasePersonalSimpleCharacterEmbed | null = null;
