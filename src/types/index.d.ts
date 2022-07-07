@@ -16,7 +16,7 @@ declare global {
             isPermitted: (interaction: CommandInteraction) => boolean;
         }
 
-        interface Timestamps {
+        interface MongoTimestamps {
             createdAt: Date;
             updatedAt: Date;
         }
@@ -56,7 +56,7 @@ declare global {
             sequence: string;
         }
 
-        interface PartialCharacterSchema extends Partial<Timestamps> {
+        interface PartialCharacterSchema extends Partial<MongoTimestamps> {
             name: string;
             id: number;
             influence: number;
@@ -69,20 +69,50 @@ declare global {
         type CharacterSchema = Required<PartialCharacterSchema>
 
         // User schema and documents
-        type UserDocument = Document<unknown, any, UserSchema> & UserSchema & Timestamps;
-        type LeanUserDocument = LeanDocument<LeanUserSchema> & Timestamps;
+        type UserDocument = Document<unknown, any, UserSchema> & UserSchema & MongoTimestamps;
+        type LeanUserDocument = LeanDocument<LeanUserSchema> & MongoTimestamps;
+
+        type GachaType = 'badge' | 'character';
+
+        interface GachaResultBadgeSchema {
+            tier: number;
+            badgeId: number;
+        }
+
+        interface GachaResultCharacterSchema {
+            globalId: number;
+            uniqueId: number;
+            rarity: string;
+        }
+
+        interface BaseGachaResultSchema extends
+            Partial<GachaResultCharacterSchema>,
+            Partial<GachaResultBadgeSchema> {
+            gachaType: GachaType;
+            stonesUsed: number;
+        }
+
+        type PartialGachaResultSchema = BaseGachaResultSchema & Partial<MongoTimestamps>;
+
+        type GachaResultSchema = BaseGachaResultSchema & MongoTimestamps;
+
+        interface GachaHistorySchema {
+            enabled: boolean;
+            history: GachaResultSchema[];
+        }
 
         interface ReminderSchema {
             drop: boolean;
             medal: boolean;
         }
 
-        interface PartialUserSchema extends Partial<Timestamps> {
+        interface PartialUserSchema extends Partial<MongoTimestamps> {
             id: string;
             seriesIds?: Map<string, boolean>;
             guildIds?: Map<string, boolean>;
             globalIds?: Map<string, string>;
             reminder?: ReminderSchema;
+            gachaHistory?: GachaHistorySchema;
         }
 
         type UserSchema = Required<PartialUserSchema>
