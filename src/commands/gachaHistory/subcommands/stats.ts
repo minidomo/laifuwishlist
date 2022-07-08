@@ -1,7 +1,7 @@
 import { bold, EmbedFooterData, inlineCode, SlashCommandSubcommandBuilder } from '@discordjs/builders';
 import dayjs from 'dayjs';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
-import { RarityConstants } from 'laifutil';
+import { Rarity, RarityConstants } from 'laifutil';
 import { INFLUENCE_EMOJI } from '../../../constants';
 import { User } from '../../../model';
 import { logger } from '../../../util';
@@ -76,20 +76,21 @@ function filter(arr: BotTypes.GachaResultSchema[], filterType: FilterType | null
 
 function rarityStats(arr: BotTypes.GachaResult[]): string {
     const rarityCount: Map<string, number> = new Map();
+    Object.values(RarityConstants).forEach((e: Rarity) => rarityCount.set(e.SYMBOL, 0));
 
     let characters = 0;
 
     arr.forEach(e => {
         if (isGachaResultCharacterSchema(e.result)) {
             characters++;
-            const count = rarityCount.get(e.result.rarity) ?? 0;
-            rarityCount.set(e.result.rarity, count + 1);
+            rarityCount.set(e.result.rarity, (rarityCount.get(e.result.rarity) as number) + 1);
         }
     });
 
     function rarityLine(rarity: string): string {
-        const percent = characters === 0 ? 0 : (rarityCount.get(rarity) as number) / characters * 100;
-        return `${bold(rarity)}・${rarityCount.get(rarity)} ${inlineCode(`${percent.toFixed(0)}%`)}`;
+        const count = rarityCount.get(rarity) as number;
+        const percent = characters === 0 ? 0 : count / characters * 100;
+        return `${bold(rarity)}・${count} ${inlineCode(`${percent.toFixed(0)}%`)}`;
     }
 
     const ret = [
