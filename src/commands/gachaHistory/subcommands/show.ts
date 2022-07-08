@@ -3,18 +3,17 @@ import dayjs from 'dayjs';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
 import { cleanCharacterName } from 'laifutil';
 import { MISSING_INFO } from '../../../constants';
-import { Character, User } from '../../../model';
+import { User } from '../../../model';
 import { Pages } from '../../../structures';
-import { isGachaResultBadgeSchema, isGachaResultCharacterSchema } from '../../../util';
+import { isGachaResultBadgeSchema, isGachaResultCharacterSchema, toGachaResultArray } from '../util';
 
-interface GachaResult {
-    result: BotTypes.GachaResultSchema;
-    character?: BotTypes.LeanCharacterDocument;
-}
-
-type SortOption = 'top_influence' | 'low_influence';
+type SortType = 'top_influence' | 'low_influence';
 
 export const data = new SlashCommandSubcommandBuilder()
+    .addIntegerOption(option =>
+        option
+            .setName('page')
+            .setDescription('The page to start on'))
     .addStringOption(option =>
         option
             .setChoices(
@@ -32,16 +31,18 @@ export async function execute(interaction: CommandInteraction, unique: BotTypes.
 
     const { options, user } = interaction;
 
-    const sortOption = options.getString('sort') as SortOption | null;
+    const pageNumber = options.getInteger('page') ?? undefined;
+    const sortType = options.getString('sort') as SortType | null;
 
     const targetUser = await User.findOne({ id: user.id })
         .select('gachaHistory.history')
         .lean() as BotTypes.LeanUserDocument | null;
 
     if (targetUser) {
-        const arr = await toGachaResultArray(targetUser.gachaHistory.history);
-        const sortedArr = sort(arr, sortOption);
-        const lines = createLines(sortedArr);
+        let arr = await toGachaResultArray(targetUser.gachaHistory.history);
+        arr = sort(arr, sortType);
+
+        const lines = createLines(arr);
 
         const embed = new MessageEmbed()
             .setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
@@ -55,7 +56,7 @@ export async function execute(interaction: CommandInteraction, unique: BotTypes.
             embed,
         });
 
-        pages.start({ deferred: true });
+        pages.start({ deferred: true, page: pageNumber });
     } else {
         await interaction.editReply({ content: `Could not find gacha history for ${user.username}` });
     }
@@ -66,34 +67,15 @@ export function isPermitted(_interaction: CommandInteraction) {
     return true;
 }
 
-function toGachaResultArray(arr: BotTypes.GachaResultSchema[]): Promise<GachaResult[]> {
-    const promises = arr.map(async result => {
-        const temp: GachaResult = { result };
-
-        if (isGachaResultCharacterSchema(result)) {
-            const character = await Character.findOne({ id: result.globalId })
-                .lean() as BotTypes.LeanCharacterDocument | null;
-
-            if (character) {
-                temp.character = character;
-            }
-        }
-
-        return temp;
-    });
-
-    return Promise.all(promises);
-}
-
 function compareDate(a: Date, b: Date): number {
     return dayjs(a).isAfter(dayjs(b)) ? -1 : 1;
 }
 
-function sort(arr: GachaResult[], sortOption: SortOption | null): GachaResult[] {
-    let ret: GachaResult[];
+function sort(arr: BotTypes.GachaResult[], sortType: SortType | null): BotTypes.GachaResult[] {
+    let ret: BotTypes.GachaResult[];
 
-    if (sortOption === 'top_influence' || sortOption === 'low_influence') {
-        const mul = sortOption === 'top_influence' ? -1 : 1;
+    if (sortType === 'top_influence' || sortType === 'low_influence') {
+        const mul = sortType === 'top_influence' ? -1 : 1;
 
         ret = arr
             .filter(e => isGachaResultCharacterSchema(e.result))
@@ -122,7 +104,7 @@ function sort(arr: GachaResult[], sortOption: SortOption | null): GachaResult[] 
     return ret;
 }
 
-function createLines(arr: GachaResult[]): string[] {
+function createLines(arr: BotTypes.GachaResult[]): string[] {
     const ret = arr.map(e => {
         if (isGachaResultCharacterSchema(e.result)) {
             let characterInfo: string = MISSING_INFO;

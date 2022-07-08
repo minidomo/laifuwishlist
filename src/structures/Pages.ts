@@ -12,6 +12,16 @@ import { capitalize, CustomId } from '../util';
 
 type ButtonLabel = 'prev' | 'next';
 
+function clamp(lower: number, upper: number, value: number) {
+    if (value < lower) {
+        return lower;
+    } else if (value > upper) {
+        return upper;
+    } else {
+        return value;
+    }
+}
+
 export class Pages {
     readonly interaction: CommandInteraction | ModalSubmitInteraction;
     readonly unique: BotTypes.Unique;
@@ -39,10 +49,14 @@ export class Pages {
 
         this.row = new MessageActionRow().addComponents(this.createButton('prev'), this.createButton('next'));
         this.currentPage = 1;
-        this.lastPage = this.lines.length === 0 ? 1 : Math.ceil(this.lines.length / this.linesPerPage);
+        this.lastPage = Math.max(1, Math.ceil(this.lines.length / this.linesPerPage));
     }
 
-    async start(options: BotTypes.PagesStartOptions) {
+    async start(options: BotTypes.PagesStartOptions = {}) {
+        if (typeof options.page === 'number') {
+            this.currentPage = clamp(1, this.lastPage, options.page);
+        }
+
         this.updateEmbed();
 
         if (options.deferred) {

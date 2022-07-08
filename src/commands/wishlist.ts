@@ -1,7 +1,7 @@
 import { bold, inlineCode, SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
 import { cleanCharacterName } from 'laifutil';
-import { MISSING_INFO } from '../constants';
+import { INFLUENCE_EMOJI, MISSING_INFO } from '../constants';
 import { Character, User } from '../model';
 import { Pages } from '../structures';
 import { capitalize } from '../util';
@@ -29,6 +29,10 @@ export const data = new SlashCommandBuilder()
             .setName('category')
             .setDescription('The category to display')
             .setRequired(true))
+    .addIntegerOption(option =>
+        option
+            .setName('page')
+            .setDescription('The page to start on'))
     .addUserOption(option =>
         option
             .setName('user')
@@ -41,6 +45,7 @@ export async function execute(interaction: CommandInteraction, unique: BotTypes.
 
     const { options, user } = interaction;
 
+    const pageNumber = options.getInteger('page') ?? undefined;
     const category = options.getString('category') as Category;
     const targetUser = options.getUser('user') ?? user;
 
@@ -64,7 +69,7 @@ export async function execute(interaction: CommandInteraction, unique: BotTypes.
             embed,
         });
 
-        pages.start({ deferred: true });
+        pages.start({ deferred: true, page: pageNumber });
     } else {
         await interaction.editReply({ content: `No wishlist found for ${targetUser.username}` });
     }
@@ -102,7 +107,7 @@ async function createCharacterLines(user: BotTypes.LeanUserDocument): Promise<st
 
             if (e.character) {
                 characterInfo = `${cleanCharacterName(e.character.name)}・`
-                    + `${bold(`${e.character.influence}`)} <:inf:755213119055200336>`;
+                    + `${bold(`${e.character.influence}`)} ${INFLUENCE_EMOJI}`;
             }
 
             return `${inlineCode(`${e.id}${ids}`)} ${characterInfo}`;
