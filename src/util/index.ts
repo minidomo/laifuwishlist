@@ -4,4 +4,3 @@ export * from './string';
 export * as CharacterSchema from './characterSchema';
 export * from './error';
 export * from './user';
-export * from './gachaResult';

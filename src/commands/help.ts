@@ -17,6 +17,7 @@ const everyoneCommands = [
     'wishlist',
     'gachahistory toggle',
     'gachahistory show',
+    'gachahistory stats',
 ].sort().join(', ');
 
 export const data = new SlashCommandBuilder()

@@ -29,7 +29,6 @@ declare global {
         }
 
         // Character schema and documents
-
         type CharacterDocument = Document<unknown, any, CharacterSchema> & CharacterSchema; // eslint-disable-line
         type LeanCharacterDocument = LeanDocument<CharacterSchema>;
 
@@ -149,5 +148,10 @@ declare global {
             deferred?: boolean;
         }
 
+        // Gacha history
+        interface GachaResult {
+            result: GachaResultSchema;
+            character?: LeanCharacterDocument;
+        }
     }
 }

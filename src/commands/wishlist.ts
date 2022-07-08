@@ -1,7 +1,7 @@
 import { bold, inlineCode, SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
 import { cleanCharacterName } from 'laifutil';
-import { MISSING_INFO } from '../constants';
+import { INFLUENCE_EMOJI, MISSING_INFO } from '../constants';
 import { Character, User } from '../model';
 import { Pages } from '../structures';
 import { capitalize } from '../util';
@@ -107,7 +107,7 @@ async function createCharacterLines(user: BotTypes.LeanUserDocument): Promise<st
 
             if (e.character) {
                 characterInfo = `${cleanCharacterName(e.character.name)}・`
-                    + `${bold(`${e.character.influence}`)} <:inf:755213119055200336>`;
+                    + `${bold(`${e.character.influence}`)} ${INFLUENCE_EMOJI}`;
             }
 
             return `${inlineCode(`${e.id}${ids}`)} ${characterInfo}`;
