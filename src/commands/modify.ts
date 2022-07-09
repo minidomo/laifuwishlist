@@ -115,6 +115,8 @@ function handleModal(args: Args) {
 
     interaction.awaitModalSubmit({ filter, time: 30_000 })
         .then(async i => {
+            await i.deferReply();
+
             const user = await findUser(i.user.id);
 
             const guild = i.guild as Guild;
@@ -148,7 +150,7 @@ function handleModal(args: Args) {
                 embed,
             });
 
-            pages.start({ ephemeral: true });
+            pages.start({ deferred: true });
         })
         .catch(handleError);
 }

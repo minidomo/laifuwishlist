@@ -7,8 +7,10 @@
     "lint:fix": "eslint . --fix",
     "prebuild": "rimraf dist && npm run lint:fix",
     "build": "tsc",
-    "start": "node -r dotenv/config dist/index.js",
-    "deploy:commands": "node -r dotenv/config dist/deploy-commands.js",
+    "start:dev": "node -r dotenv/config dist/index.js -- --dev",
+    "start:prod": "node -r dotenv/config dist/index.js -- --prod",
+    "commands:dev": "node -r dotenv/config dist/deploy-commands.js -- --dev",
+    "commands:prod": "node -r dotenv/config dist/deploy-commands.js -- --prod",
     "clean:logs": "rimraf logs/*",
     "info": "py scripts/info.py"
   },

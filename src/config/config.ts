@@ -16,3 +16,5 @@ export const clientId = production ? env.PROD_DISCORD_CLIENT_ID : env.DEV_DISCOR
 export const ownerClientId = env.OWNER_CLIENT_ID;
 
 export const databaseUri = production ? env.PROD_DATABASE_URI : env.DEV_DATABASE_URI;
+
+export const saveLogs = env.SAVE_LOGS === '1';
