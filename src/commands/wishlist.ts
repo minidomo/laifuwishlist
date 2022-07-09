@@ -91,7 +91,7 @@ async function createCharacterLines(user: BotTypes.LeanUserDocument): Promise<st
     const arr = ids.map(id => ({
             id,
             images: user.globalIds[id],
-            charcter: characterMap.get(id),
+            character: characterMap.get(id),
         } as CharacterInfo));
 
     const ret = arr
