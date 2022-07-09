@@ -17,17 +17,18 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: CommandInteraction, _unique: BotTypes.Unique) {
     const { options } = interaction;
 
+    await interaction.deferReply();
+
     const globalId = options.getInteger('global_id');
 
     if (globalId === null) {
-        await interaction.reply({
+        await interaction.editReply({
             content: 'Provide the query with information to get an answer',
-            ephemeral: true,
         });
     } else {
         const character = await Character.findOne({ id: globalId }).lean() as BotTypes.LeanCharacterDocument | null;
         const embed = createCharacterEmbed(character);
-        await interaction.reply({
+        await interaction.editReply({
             embeds: [embed],
         });
     }

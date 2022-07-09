@@ -12,6 +12,8 @@ declare global {
             PROD_DATABASE_URI: string;
 
             OWNER_CLIENT_ID: string;
+
+            SAVE_LOGS: string;
         }
     }
 
