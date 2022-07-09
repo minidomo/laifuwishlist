@@ -1,31 +1,17 @@
-import { Character } from '../../model';
+import { createCharacterMap } from '../../util';
 
-export function toGachaResultArray(arr: BotTypes.GachaResultSchema[]): Promise<BotTypes.GachaResult[]> {
-    const characters: Map<number, BotTypes.LeanCharacterDocument> = new Map();
+export async function toGachaResultArray(arr: BotTypes.GachaResultSchema[]): Promise<BotTypes.GachaResult[]> {
+    const gachaCharacters = arr.filter(isGachaResultCharacterSchema);
 
-    const promises = arr.map(async result => {
-        const temp: BotTypes.GachaResult = { result };
+    const ids = gachaCharacters.map(e => e.globalId);
+    const characterMap = await createCharacterMap(ids, 'global');
 
-        if (isGachaResultCharacterSchema(result)) {
-            const res = characters.get(result.globalId);
+    const ret = gachaCharacters.map(e => ({
+            result: e,
+            character: characterMap.get(e.globalId),
+        } as BotTypes.GachaResult));
 
-            if (res) {
-                temp.character = res;
-            } else {
-                const character = await Character.findOne({ id: result.globalId })
-                    .lean() as BotTypes.LeanCharacterDocument | null;
-
-                if (character) {
-                    temp.character = character;
-                    characters.set(result.globalId, character);
-                }
-            }
-        }
-
-        return temp;
-    });
-
-    return Promise.all(promises);
+    return ret;
 }
 
 export function isGachaResultCharacterSchema(result: BotTypes.GachaResultSchema):

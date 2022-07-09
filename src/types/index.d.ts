@@ -153,5 +153,8 @@ declare global {
             result: GachaResultSchema;
             character?: LeanCharacterDocument;
         }
+
+        // Character map
+        type IdType = 'global' | 'series';
     }
 }
