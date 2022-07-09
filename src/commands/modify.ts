@@ -10,9 +10,8 @@ import {
 } from 'discord.js';
 import { cleanCharacterName } from 'laifutil';
 import { MISSING_INFO } from '../constants';
-import { Character } from '../model';
 import { Pages } from '../structures';
-import { CustomId, findUser, handleError } from '../util';
+import { createCharacterMap, CustomId, findUser, handleError } from '../util';
 
 type Category = 'series' | 'characters';
 
@@ -215,35 +214,27 @@ function parseCharacters(str: string): WishlistCharacter[] {
     return ret;
 }
 
-function createSeriesLines(ids: number[]): Promise<string[]> {
-    const ret = Promise.all(
-        ids.map(async id => {
-            const res = await Character.findOne({ 'series.id': id })
-                .select('series')
-                .lean() as BotTypes.LeanCharacterDocument | null;
-
-            const title = res?.series.title.english ?? MISSING_INFO;
-
-            return `${inlineCode(`${id}`)} ${title}`;
-        }),
-    );
+async function createSeriesLines(ids: number[]): Promise<string[]> {
+    const characterMap = await createCharacterMap(ids, 'series', 'series.title.english');
+    const ret = ids.map(id => {
+        const res = characterMap.get(id);
+        const title = res?.series.title.english ?? MISSING_INFO;
+        return `${inlineCode(`${id}`)} ${title}`;
+    });
 
     return ret;
 }
 
-function createCharacterLines(characters: WishlistCharacter[]): Promise<string[]> {
-    const ret = Promise.all(
-        characters.map(async e => {
-            const res = await Character.findOne({ id: e.id })
-                .select('name')
-                .lean() as BotTypes.LeanCharacterDocument | null;
+async function createCharacterLines(characters: WishlistCharacter[]): Promise<string[]> {
+    const ids = characters.map(e => e.id);
+    const characterMap = await createCharacterMap(ids, 'global', 'name');
+    const ret = characters.map(e => {
+        const res = characterMap.get(e.id);
+        const name = res ? cleanCharacterName(res.name) : MISSING_INFO;
+        const wantedIds = e.images.length === 9 ? '' : ` ${e.images}`;
 
-            const name = res ? cleanCharacterName(res.name) : MISSING_INFO;
-            const ids = e.images.length === 9 ? '' : ` ${e.images}`;
-
-            return `${inlineCode(`${e.id}${ids}`)} ${name}`;
-        }),
-    );
+        return `${inlineCode(`${e.id}${wantedIds}`)} ${name}`;
+    });
 
     return ret;
 }

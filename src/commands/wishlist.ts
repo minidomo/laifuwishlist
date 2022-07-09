@@ -2,19 +2,19 @@ import { bold, inlineCode, SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
 import { cleanCharacterName } from 'laifutil';
 import { INFLUENCE_EMOJI, MISSING_INFO } from '../constants';
-import { Character, User } from '../model';
+import { User } from '../model';
 import { Pages } from '../structures';
-import { capitalize } from '../util';
+import { capitalize, createCharacterMap } from '../util';
 
 interface CharacterInfo {
     id: number;
     images: string;
-    character: BotTypes.LeanCharacterDocument | null;
+    character?: BotTypes.LeanCharacterDocument;
 }
 
 interface SeriesInfo {
     id: number;
-    title: string | null;
+    title?: string;
 }
 
 type Category = 'series' | 'characters';
@@ -86,23 +86,18 @@ function createLines(category: Category, user: BotTypes.LeanUserDocument): Promi
 }
 
 async function createCharacterLines(user: BotTypes.LeanUserDocument): Promise<string[]> {
-    const promises = Array.from(Object.keys(user.globalIds))
-        .map(async gid => {
-            const images = user.globalIds[gid];
+    const ids = Array.from(Object.keys(user.globalIds)).map(id => parseInt(id));
+    const characterMap = await createCharacterMap(ids, 'global', 'name influence');
+    const arr = ids.map(id => ({
+            id,
+            images: user.globalIds[id],
+            charcter: characterMap.get(id),
+        } as CharacterInfo));
 
-            const id = parseInt(gid);
-            const character = await Character.findOne({ id })
-                .select('name influence')
-                .lean() as BotTypes.LeanCharacterDocument | null;
-
-            return { id, images, character } as CharacterInfo;
-        });
-
-    const arr = await Promise.all(promises);
     const ret = arr
         .sort((a, b) => a.id - b.id)
         .map(e => {
-            const ids = e.images.length === 9 ? '' : ` ${e.images}`;
+            const wantedIds = e.images.length === 9 ? '' : ` ${e.images}`;
             let characterInfo: string = MISSING_INFO;
 
             if (e.character) {
@@ -110,28 +105,20 @@ async function createCharacterLines(user: BotTypes.LeanUserDocument): Promise<st
                     + `${bold(`${e.character.influence}`)} ${INFLUENCE_EMOJI}`;
             }
 
-            return `${inlineCode(`${e.id}${ids}`)} ${characterInfo}`;
+            return `${inlineCode(`${e.id}${wantedIds}`)} ${characterInfo}`;
         });
 
     return ret;
 }
 
 async function createSeriesLines(user: BotTypes.LeanUserDocument): Promise<string[]> {
-    const promises = Array.from(Object.keys(user.seriesIds))
-        .map(async sid => {
-            const id = parseInt(sid);
+    const ids = Array.from(Object.keys(user.seriesIds)).map(id => parseInt(id));
+    const characterMap = await createCharacterMap(ids, 'series', 'series.title.english');
+    const arr = ids.map(id => ({
+            id,
+            title: characterMap.get(id)?.series.title.english,
+        } as SeriesInfo));
 
-            const character = await Character.findOne({ 'series.id': id })
-                .select('series')
-                .lean() as BotTypes.LeanCharacterDocument | null;
-
-            return {
-                id,
-                title: character?.series.title.english ?? null,
-            } as SeriesInfo;
-        });
-
-    const arr = await Promise.all(promises);
     const ret = arr
         .sort((a, b) => a.id - b.id)
         .map(e => {
