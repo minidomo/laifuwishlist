@@ -95,14 +95,12 @@ export class Pages {
     }
 
     private updateEmbed() {
-        this.embed
-            .setDescription(this.createDescription())
-            .setFooter(this.createFooter());
+        this.embed.setDescription(this.createDescription()).setFooter(this.createFooter());
     }
 
     private updateCurrentPage(action: ButtonLabel) {
         const delta = action === 'next' ? 1 : -1;
-        this.currentPage = ((this.currentPage - 1) + delta + this.lastPage) % this.lastPage + 1;
+        this.currentPage = ((this.currentPage - 1 + delta + this.lastPage) % this.lastPage) + 1;
     }
 
     private handleEvents() {

@@ -5,11 +5,7 @@ import { Bounds, RarityStatistics, RarityConstants } from 'laifutil';
 import { Character } from '../model';
 
 export const data = new SlashCommandBuilder()
-    .addIntegerOption(option =>
-        option
-            .setMinValue(0)
-            .setName('global_id')
-            .setDescription('Global ID of a character'))
+    .addIntegerOption(option => option.setMinValue(0).setName('global_id').setDescription('Global ID of a character'))
     .setName('query')
     .setDescription('Query a character from the database.');
 
@@ -26,7 +22,7 @@ export async function execute(interaction: CommandInteraction, _unique: BotTypes
             content: 'Provide the query with information to get an answer',
         });
     } else {
-        const character = await Character.findOne({ id: globalId }).lean() as BotTypes.LeanCharacterDocument | null;
+        const character = (await Character.findOne({ id: globalId }).lean()) as BotTypes.LeanCharacterDocument | null;
         const embed = createCharacterEmbed(character);
         await interaction.editReply({
             embeds: [embed],
@@ -40,7 +36,7 @@ export function isPermitted(_interaction: CommandInteraction): boolean {
 }
 
 function createRarityString(rarity: RarityStatistics): string {
-    let burnRate = (rarity.totalClaimed - rarity.existingAmount) / rarity.totalClaimed * 100;
+    let burnRate = ((rarity.totalClaimed - rarity.existingAmount) / rarity.totalClaimed) * 100;
     if (rarity.totalClaimed === 0) {
         burnRate = 0;
     }
@@ -52,7 +48,7 @@ function createRankString(range: Bounds): string {
 }
 
 function createCharacterEmbed(character: BotTypes.LeanCharacterDocument | null) {
-    const embed = new MessageEmbed().setColor(0xF0B67F);
+    const embed = new MessageEmbed().setColor(0xf0b67f);
 
     if (character === null) {
         embed.setDescription('Could not find character');
@@ -61,27 +57,39 @@ function createCharacterEmbed(character: BotTypes.LeanCharacterDocument | null) 
 
         embed
             .setTitle(character.name)
-            .addField('General',
-                `${bold('Global ID:')} ${character.id}\n${
-                bold('Total Images:')} ${character.totalImages}\n${
-                bold('Influence:')} ${character.influence}\n${
-                bold('Rank:')} ${createRankString(character.influenceRankRange)}\n`,
-                true)
-            .addField('Rarity Burn Rate',
-                `${bold(RarityConstants.ALPHA.SYMBOL)} ${createRarityString(character.rarities.alpha)}\n${
-                bold(RarityConstants.BETA.SYMBOL)} ${createRarityString(character.rarities.beta)}\n${
-                bold(RarityConstants.GAMMA.SYMBOL)} ${createRarityString(character.rarities.gamma)}\n${
-                bold(RarityConstants.DELTA.SYMBOL)} ${createRarityString(character.rarities.delta)}\n${
-                bold(RarityConstants.EPSILON.SYMBOL)} ${createRarityString(character.rarities.epsilon)}\n${
-                bold(RarityConstants.ZETA.SYMBOL)} ${createRarityString(character.rarities.zeta)}\n${
-                bold(RarityConstants.ULTRA.SYMBOL)} ${createRarityString(character.rarities.ultra)}\n`,
-                true)
-            .addField('Series',
-                `${bold('ENG:')} ${character.series.title.english}\n${
-                bold('ALT:')} ${character.series.title.alternate}\n${
-                bold('Series ID:')} ${character.series.id}\n${
-                bold('Sequence:')} ${inlineCode(character.series.sequence)}\n`,
-                false)
+            .addField(
+                'General',
+                `${bold('Global ID:')} ${character.id}\n${bold('Total Images:')} ${character.totalImages}\n${bold(
+                    'Influence:',
+                )} ${character.influence}\n${bold('Rank:')} ${createRankString(character.influenceRankRange)}\n`,
+                true,
+            )
+            .addField(
+                'Rarity Burn Rate',
+                `${bold(RarityConstants.ALPHA.SYMBOL)} ${createRarityString(character.rarities.alpha)}\n${bold(
+                    RarityConstants.BETA.SYMBOL,
+                )} ${createRarityString(character.rarities.beta)}\n${bold(
+                    RarityConstants.GAMMA.SYMBOL,
+                )} ${createRarityString(character.rarities.gamma)}\n${bold(
+                    RarityConstants.DELTA.SYMBOL,
+                )} ${createRarityString(character.rarities.delta)}\n${bold(
+                    RarityConstants.EPSILON.SYMBOL,
+                )} ${createRarityString(character.rarities.epsilon)}\n${bold(
+                    RarityConstants.ZETA.SYMBOL,
+                )} ${createRarityString(character.rarities.zeta)}\n${bold(
+                    RarityConstants.ULTRA.SYMBOL,
+                )} ${createRarityString(character.rarities.ultra)}\n`,
+                true,
+            )
+            .addField(
+                'Series',
+                `${bold('ENG:')} ${character.series.title.english}\n${bold('ALT:')} ${
+                    character.series.title.alternate
+                }\n${bold('Series ID:')} ${character.series.id}\n${bold('Sequence:')} ${inlineCode(
+                    character.series.sequence,
+                )}\n`,
+                false,
+            )
             .setFooter({
                 text: `Last Updated: ${lastUpdated}`,
             });

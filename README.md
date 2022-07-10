@@ -8,16 +8,16 @@ LaifuWishlist is a supplementary Discord bot to [LaifuBot](https://laifubot.fand
 
 ## Features
 
-- Character and series wishlists
-- Unlimited wishlist slots
-- Support for image numbers in character wishlists
-- Wishlist alerts for gacha, view, and burn commands
-- Notifications for medal drops and finished drop cooldowns
+-   Character and series wishlists
+-   Unlimited wishlist slots
+-   Support for image numbers in character wishlists
+-   Wishlist alerts for gacha, view, and burn commands
+-   Notifications for medal drops and finished drop cooldowns
 
 ## Prequisites
 
-- [Node.js](https://nodejs.org/en/)
-- [MongoDB](https://www.mongodb.com/)
+-   [Node.js](https://nodejs.org/en/)
+-   [MongoDB](https://www.mongodb.com/)
 
 ## Getting started
 
@@ -32,7 +32,7 @@ npm run build
 
 Create a `.env` file in the root directory and set environment variables accordingly. See `.env.example`.
 
-Start a MongoDB local instance in a separate terminal. 
+Start a MongoDB local instance in a separate terminal.
 
 > This is not needed if you're using something like MongoDB Atlas.
 

@@ -10,20 +10,16 @@ export const data = new SlashCommandBuilder()
         option
             .setName('type')
             .setDescription('Type of reminder')
-            .setChoices(
-                { name: 'Drop', value: 'drop' },
-                { name: 'Medal', value: 'medal' },
-            )
-            .setRequired(true))
+            .setChoices({ name: 'Drop', value: 'drop' }, { name: 'Medal', value: 'medal' })
+            .setRequired(true),
+    )
     .addStringOption(option =>
         option
             .setName('toggle')
             .setDescription('Toggle this reminder on/off')
-            .setChoices(
-                { name: 'On', value: 'on' },
-                { name: 'Off', value: 'off' },
-            )
-            .setRequired(true))
+            .setChoices({ name: 'On', value: 'on' }, { name: 'Off', value: 'off' })
+            .setRequired(true),
+    )
     .setName('reminder')
     .setDescription('Enable/disable reminders');
 

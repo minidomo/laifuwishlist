@@ -39,22 +39,18 @@ const CHARACTER_ID_REGEX = /^(\d+)(?: +(\d+))?/;
 export const data = new SlashCommandBuilder()
     .addStringOption(option =>
         option
-            .setChoices(
-                { name: 'Add', value: 'add' },
-                { name: 'Remove', value: 'remove' },
-            )
+            .setChoices({ name: 'Add', value: 'add' }, { name: 'Remove', value: 'remove' })
             .setName('action')
             .setDescription('Action to take')
-            .setRequired(true))
+            .setRequired(true),
+    )
     .addStringOption(option =>
         option
-            .setChoices(
-                { name: 'Series', value: 'series' },
-                { name: 'Characters', value: 'characters' },
-            )
+            .setChoices({ name: 'Series', value: 'series' }, { name: 'Characters', value: 'characters' })
             .setName('category')
             .setDescription('The category to display')
-            .setRequired(true))
+            .setRequired(true),
+    )
     .setName('modify')
     .setDescription('Add or remove characters or series to your wishlist');
 
@@ -80,13 +76,12 @@ function createMessageActionRow(unique: BotTypes.Unique, category: Category): Me
     const input = new TextInputComponent().setStyle('PARAGRAPH');
 
     if (category === 'characters') {
-        input.setCustomId(customId)
+        input
+            .setCustomId(customId)
             .setLabel('Global IDs (image numbers are optional)')
             .setPlaceholder('<global_id> <images>\n630 269\n4652\n13540 | Anju Emma (アンジュ・エマ)・285inf');
     } else {
-        input.setCustomId(customId)
-            .setLabel('Series IDs')
-            .setPlaceholder('351\n56');
+        input.setCustomId(customId).setLabel('Series IDs').setPlaceholder('351\n56');
     }
 
     return new MessageActionRow<TextInputComponent>().addComponents(input);
@@ -97,9 +92,7 @@ function createModal(unique: BotTypes.Unique, action: BotTypes.Modification, cat
 
     const title = action === 'add' ? 'Add to wishlist' : 'Remove from wishlist';
 
-    const modal = new Modal()
-        .setTitle(title)
-        .setCustomId(modalCustomId);
+    const modal = new Modal().setTitle(title).setCustomId(modalCustomId);
 
     modal.addComponents(createMessageActionRow(unique, category));
 
@@ -113,7 +106,8 @@ function handleModal(args: Args) {
         return i.user.id === interaction.user.id && CustomId.getUnique(i.customId) === unique;
     }
 
-    interaction.awaitModalSubmit({ filter, time: 30_000 })
+    interaction
+        .awaitModalSubmit({ filter, time: 30_000 })
         .then(async i => {
             await i.deferReply();
 
@@ -136,11 +130,9 @@ function handleModal(args: Args) {
             }
 
             const title = action === 'add' ? 'Added to wishlist' : 'Removed from wishlist';
-            const color = action === 'add' ? 0x7BF1A8 : 0xFF5376;
+            const color = action === 'add' ? 0x7bf1a8 : 0xff5376;
 
-            const embed = new MessageEmbed()
-                .setColor(color)
-                .setTitle(title);
+            const embed = new MessageEmbed().setColor(color).setTitle(title);
 
             const pages = new Pages({
                 interaction: i,
@@ -172,7 +164,9 @@ async function updateUser(options: UpdateUserOptions) {
             if (action === 'add') {
                 newImagesStr = uniqueImages(imagesStr + e.images);
             } else if (imagesStr) {
-                newImagesStr = Array.from(imagesStr).filter(v => !e.images.includes(v)).join('');
+                newImagesStr = Array.from(imagesStr)
+                    .filter(v => !e.images.includes(v))
+                    .join('');
             }
 
             if (newImagesStr) {
@@ -198,7 +192,9 @@ async function updateUser(options: UpdateUserOptions) {
 function uniqueImages(str: string | undefined): string {
     if (str) {
         const set = new Set(Array.from(str));
-        const ret = Array.from(set).filter(e => /[1-9]/.test(e)).sort();
+        const ret = Array.from(set)
+            .filter(e => /[1-9]/.test(e))
+            .sort();
         return ret.join('');
     } else {
         return '123456789';
@@ -206,7 +202,8 @@ function uniqueImages(str: string | undefined): string {
 }
 
 function parseCharacters(str: string): WishlistCharacter[] {
-    const ret = str.split(/[\r\n]+/)
+    const ret = str
+        .split(/[\r\n]+/)
         .filter(line => CHARACTER_ID_REGEX.test(line))
         .map(line => {
             const match = line.match(CHARACTER_ID_REGEX) as RegExpMatchArray;

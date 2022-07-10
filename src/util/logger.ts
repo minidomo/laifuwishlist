@@ -14,8 +14,5 @@ if (saveLogs) {
 
 export const logger = createLogger({
     transports: curTransports,
-    format: format.combine(
-        format.timestamp(),
-        format.json({ space: 4 }),
-    ),
+    format: format.combine(format.timestamp(), format.json({ space: 4 })),
 });

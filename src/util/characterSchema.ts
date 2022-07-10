@@ -5,11 +5,10 @@ type CloneableObject = Record<string, any>; // eslint-disable-line
 function clone<T>(o: T): T {
     const ret: CloneableObject = {};
 
-    Object.keys(o)
-        .forEach(key => {
-            const obj = o as CloneableObject;
-            ret[key] = typeof obj[key] === 'object' ? clone(obj[key]) : obj[key];
-        });
+    Object.keys(o).forEach(key => {
+        const obj = o as CloneableObject;
+        ret[key] = typeof obj[key] === 'object' ? clone(obj[key]) : obj[key];
+    });
 
     return ret as T;
 }

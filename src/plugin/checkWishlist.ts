@@ -51,7 +51,7 @@ export async function run(newMessage: Message | PartialMessage, oldMessage?: Mes
 
             if (userIds.length > 0) {
                 const embed = new MessageEmbed()
-                    .setColor(0xC7EFCF)
+                    .setColor(0xc7efcf)
                     .setTitle('Users that may be interested')
                     .setDescription(userIds.map(id => `<@${id}>`).join(' '));
 
