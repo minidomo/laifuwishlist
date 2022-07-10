@@ -10,10 +10,7 @@ import { isGachaResultBadgeSchema, isGachaResultCharacterSchema, toGachaResultAr
 type SortType = 'top_influence' | 'low_influence';
 
 export const data = new SlashCommandSubcommandBuilder()
-    .addIntegerOption(option =>
-        option
-            .setName('page')
-            .setDescription('The page to start on'))
+    .addIntegerOption(option => option.setName('page').setDescription('The page to start on'))
     .addStringOption(option =>
         option
             .setChoices(
@@ -34,9 +31,9 @@ export async function execute(interaction: CommandInteraction, unique: BotTypes.
     const pageNumber = options.getInteger('page') ?? undefined;
     const sortType = options.getString('sort') as SortType | null;
 
-    const targetUser = await User.findOne({ id: user.id })
+    const targetUser = (await User.findOne({ id: user.id })
         .select('gachaHistory.history')
-        .lean() as BotTypes.LeanUserDocument | null;
+        .lean()) as BotTypes.LeanUserDocument | null;
 
     if (targetUser) {
         let arr = await toGachaResultArray(targetUser.gachaHistory.history);
@@ -110,15 +107,18 @@ function createLines(arr: BotTypes.GachaResult[]): string[] {
             let characterInfo: string = MISSING_INFO;
 
             if (e.character) {
-                characterInfo = `${cleanCharacterName(e.character.name)}・`
-                    + `${bold(`${e.character.influence}`)} <:inf:755213119055200336>`;
+                characterInfo =
+                    `${cleanCharacterName(e.character.name)}・` +
+                    `${bold(`${e.character.influence}`)} <:inf:755213119055200336>`;
             }
 
             // TODO delete later
             const image = e.result.image ?? '?';
 
-            return `${e.result.uniqueId} [${e.result.rarity}] #${image} ${characterInfo} `
-                + `${inlineCode(`(${e.result.globalId})`)}・${time(e.result.createdAt, 'R')}`;
+            return (
+                `${e.result.uniqueId} [${e.result.rarity}] #${image} ${characterInfo} ` +
+                `${inlineCode(`(${e.result.globalId})`)}・${time(e.result.createdAt, 'R')}`
+            );
         } else if (isGachaResultBadgeSchema(e.result)) {
             return italic('BADGE SUPPORT WIP');
         } else {

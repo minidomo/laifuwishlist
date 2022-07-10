@@ -18,7 +18,9 @@ const everyoneCommands = [
     'gachahistory toggle',
     'gachahistory show',
     'gachahistory stats',
-].sort().join(', ');
+]
+    .sort()
+    .join(', ');
 
 export const data = new SlashCommandBuilder()
     .setName('help')
@@ -28,7 +30,7 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: CommandInteraction, _unique: BotTypes.Unique) {
     const embed = new MessageEmbed()
         .setTitle('Help Information')
-        .setColor(0xBC96E6)
+        .setColor(0xbc96e6)
         .addField('Commands', everyoneCommands)
         .setDescription(description)
         .setFooter({ text: 'Developed by JB#9224' });

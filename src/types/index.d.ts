@@ -8,7 +8,6 @@ import type { Document, LeanDocument } from 'mongoose';
 
 declare global {
     namespace BotTypes {
-
         type CustomId = string;
         type Unique = string;
 
@@ -73,7 +72,7 @@ declare global {
             totalImages?: number;
         }
 
-        type CharacterSchema = Required<PartialCharacterSchema>
+        type CharacterSchema = Required<PartialCharacterSchema>;
 
         // User schema and documents
         type UserDocument = Document<unknown, any, UserSchema> & UserSchema & MongoTimestamps; // eslint-disable-line
@@ -93,9 +92,7 @@ declare global {
             image: number;
         }
 
-        interface BaseGachaResultSchema extends
-            Partial<GachaResultCharacterSchema>,
-            Partial<GachaResultBadgeSchema> {
+        interface BaseGachaResultSchema extends Partial<GachaResultCharacterSchema>, Partial<GachaResultBadgeSchema> {
             gachaType: GachaType;
             stonesUsed: number;
         }
@@ -123,7 +120,7 @@ declare global {
             gachaHistory?: GachaHistorySchema;
         }
 
-        type UserSchema = Required<PartialUserSchema>
+        type UserSchema = Required<PartialUserSchema>;
 
         interface LeanUserSchema extends Omit<UserSchema, 'seriesIds' | 'guildIds' | 'globalIds'> {
             seriesIds: Record<string, boolean>;

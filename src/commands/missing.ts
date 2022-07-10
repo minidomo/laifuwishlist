@@ -9,7 +9,8 @@ export const data = new SlashCommandBuilder()
             .setMinValue(0)
             .setMaxValue(30000)
             .setName('max_global_id')
-            .setDescription('The largest global ID to consider'))
+            .setDescription('The largest global ID to consider'),
+    )
     .setName('missing')
     .setDescription('Shows the global IDs that are missing in the database');
 
@@ -22,10 +23,7 @@ export async function execute(interaction: CommandInteraction, _unique: BotTypes
     const maxId = options.getInteger('max_global_id', true);
     const description = await createDescription(maxId);
 
-    const embed = new MessageEmbed()
-        .setColor(0xED6A5A)
-        .setTitle('Missing Information')
-        .setDescription(description);
+    const embed = new MessageEmbed().setColor(0xed6a5a).setTitle('Missing Information').setDescription(description);
 
     await interaction.editReply({
         embeds: [embed],
@@ -41,7 +39,7 @@ async function createDescription(maxId: number): Promise<string> {
     const ids: string[] = [];
     let consecutive = 0;
 
-    const characters = await Character.find({}).select('id').lean() as BotTypes.LeanCharacterDocument[];
+    const characters = (await Character.find({}).select('id').lean()) as BotTypes.LeanCharacterDocument[];
     const existingIds: Set<number> = new Set(characters.map(e => e.id));
 
     for (let i = 0; i <= maxId + 1; i++) {
@@ -51,7 +49,7 @@ async function createDescription(maxId: number): Promise<string> {
             } else if (consecutive === 2) {
                 ids.push(inlineCode(`${i - 2}`), inlineCode(`${i - 1}`));
             } else if (consecutive > 2) {
-                ids.push(inlineCode((`${i - consecutive}-${i - 1}`)));
+                ids.push(inlineCode(`${i - consecutive}-${i - 1}`));
             }
 
             consecutive = 0;

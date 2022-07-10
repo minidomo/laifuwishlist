@@ -2,14 +2,8 @@
 {
     "root": true,
     "parser": "@typescript-eslint/parser",
-    "plugins": [
-        "@typescript-eslint",
-        "import"
-    ],
-    "extends": [
-        "eslint:recommended",
-        "plugin:@typescript-eslint/recommended"
-    ],
+    "plugins": ["@typescript-eslint", "import"],
+    "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"],
     "env": {
         "es2022": true,
         "node": true
@@ -18,23 +12,13 @@
         "import/order": [
             "error",
             {
-                "groups": [
-                    "builtin",
-                    "external",
-                    "internal",
-                    "index",
-                    "sibling",
-                    "parent"
-                ],
+                "groups": ["builtin", "external", "internal", "index", "sibling", "parent"],
                 "alphabetize": {
                     "order": "asc"
                 }
             }
         ],
-        "strict": [
-            "error",
-            "global"
-        ],
+        "strict": ["error", "global"],
         "no-await-in-loop": "warn",
         "no-compare-neg-zero": "error",
         "no-template-curly-in-string": "error",
@@ -67,15 +51,8 @@
         "accessor-pairs": "warn",
         "array-callback-return": "error",
         "consistent-return": "error",
-        "curly": [
-            "error",
-            "multi-line",
-            "consistent"
-        ],
-        "dot-location": [
-            "error",
-            "property"
-        ],
+        "curly": ["error", "multi-line", "consistent"],
+        "dot-location": ["error", "property"],
         "dot-notation": "error",
         "eqeqeq": "error",
         "no-empty-function": "error",
@@ -130,17 +107,11 @@
                 "ignoreConsecutiveComments": true
             }
         ],
-        "comma-dangle": [
-            "error",
-            "always-multiline"
-        ],
+        "comma-dangle": ["error", "always-multiline"],
         "comma-spacing": "error",
         "comma-style": "error",
         "computed-property-spacing": "error",
-        "consistent-this": [
-            "error",
-            "$this"
-        ],
+        "consistent-this": ["error", "$this"],
         "eol-last": "error",
         "func-names": "error",
         "func-name-matching": "error",
@@ -154,11 +125,7 @@
         "key-spacing": "error",
         "keyword-spacing": "error",
         "max-depth": "error",
-        "max-len": [
-            "error",
-            120,
-            2
-        ],
+        "max-len": ["error", 120, 2],
         "max-nested-callbacks": [
             "error",
             {
@@ -195,19 +162,10 @@
         "no-unneeded-ternary": "error",
         "no-whitespace-before-property": "error",
         "nonblock-statement-body-position": "error",
-        "object-curly-spacing": [
-            "error",
-            "always"
-        ],
+        "object-curly-spacing": ["error", "always"],
         "operator-assignment": "error",
-        "padded-blocks": [
-            "error",
-            "never"
-        ],
-        "quote-props": [
-            "error",
-            "as-needed"
-        ],
+        "padded-blocks": ["error", "never"],
+        "quote-props": ["error", "as-needed"],
         "quotes": [
             "error",
             "single",
@@ -234,10 +192,7 @@
         "template-tag-spacing": "error",
         "unicode-bom": "error",
         "arrow-body-style": "error",
-        "arrow-parens": [
-            "error",
-            "as-needed"
-        ],
+        "arrow-parens": ["error", "as-needed"],
         "arrow-spacing": "error",
         "no-duplicate-imports": "error",
         "no-useless-computed-key": "error",

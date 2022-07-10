@@ -46,14 +46,17 @@ const influenceRankRangeDefault: BotTypes.InfluenceRankRangeSchema = {
     upper: 0,
 };
 
-const characterSchema = new Schema({
-    name: { type: String, required: true },
-    id: { type: Number, required: true },
-    influence: { type: Number, required: true },
-    series: { type: seriesSchema, required: true },
-    influenceRankRange: { type: influenceRankRangeSchema, required: true, default: influenceRankRangeDefault },
-    rarities: { type: rarityInfoCollectionSchema, required: true, default: raritiesDefault },
-    totalImages: { type: Number, required: true, default: 0 },
-}, { timestamps: true });
+const characterSchema = new Schema(
+    {
+        name: { type: String, required: true },
+        id: { type: Number, required: true },
+        influence: { type: Number, required: true },
+        series: { type: seriesSchema, required: true },
+        influenceRankRange: { type: influenceRankRangeSchema, required: true, default: influenceRankRangeDefault },
+        rarities: { type: rarityInfoCollectionSchema, required: true, default: raritiesDefault },
+        totalImages: { type: Number, required: true, default: 0 },
+    },
+    { timestamps: true },
+);
 
 export const Character = model('Character', characterSchema);

@@ -12,12 +12,10 @@ type FilterType = '24hours' | '7days';
 export const data = new SlashCommandSubcommandBuilder()
     .addStringOption(option =>
         option
-            .setChoices(
-                { name: 'Last 24 Hours', value: '24hours' },
-                { name: 'Last 7 Days', value: '7days' },
-            )
+            .setChoices({ name: 'Last 24 Hours', value: '24hours' }, { name: 'Last 7 Days', value: '7days' })
             .setName('filter')
-            .setDescription('Get statistics based on filtered data'))
+            .setDescription('Get statistics based on filtered data'),
+    )
     .setName('stats')
     .setDescription('Show statistics of your gachas');
 
@@ -29,9 +27,9 @@ export async function execute(interaction: CommandInteraction, _unique: BotTypes
 
     const filterType = options.getString('filter') as FilterType | null;
 
-    const targetUser = await User.findOne({ id: user.id })
+    const targetUser = (await User.findOne({ id: user.id })
         .select('gachaHistory.history')
-        .lean() as BotTypes.LeanUserDocument | null;
+        .lean()) as BotTypes.LeanUserDocument | null;
 
     if (targetUser) {
         const arr = await toGachaResultArray(filter(targetUser.gachaHistory.history, filterType));
@@ -43,7 +41,6 @@ export async function execute(interaction: CommandInteraction, _unique: BotTypes
             .setFooter(createFooter(arr))
             .setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
             .setTitle(`Gacha History Statistics - ${user.username}`);
-
 
         await interaction.editReply({ embeds: [embed] });
     } else {
@@ -89,7 +86,7 @@ function rarityStats(arr: BotTypes.GachaResult[]): string {
 
     function rarityLine(rarity: string): string {
         const count = rarityCount.get(rarity) as number;
-        const percent = characters === 0 ? 0 : count / characters * 100;
+        const percent = characters === 0 ? 0 : (count / characters) * 100;
         return `${bold(rarity)}・${count} ${inlineCode(`${percent.toFixed(0)}%`)}`;
     }
 
@@ -119,16 +116,16 @@ function influenceStats(arr: BotTypes.GachaResult[]): string {
         return 0;
     }
 
-
     const influenceMap: Map<number, number> = new Map();
     influences.forEach(e => influenceMap.set(e, 0));
 
     let characters = 0;
 
     function influenceLine(influence: number): string {
-        const percent = characters === 0 ? 0 : (influenceMap.get(influence) as number) / characters * 100;
-        return `${bold(`+${influence}`)} ${INFLUENCE_EMOJI} ${
-            influenceMap.get(influence)} ${inlineCode(`${percent.toFixed(0)}%`)}`;
+        const percent = characters === 0 ? 0 : ((influenceMap.get(influence) as number) / characters) * 100;
+        return `${bold(`+${influence}`)} ${INFLUENCE_EMOJI} ${influenceMap.get(influence)} ${inlineCode(
+            `${percent.toFixed(0)}%`,
+        )}`;
     }
 
     arr.forEach(e => {

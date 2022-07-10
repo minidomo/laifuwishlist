@@ -16,7 +16,6 @@ declare global {
             SAVE_LOGS: string;
         }
     }
-
 }
 
-export { };
+export {};
