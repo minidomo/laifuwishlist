@@ -1,7 +1,7 @@
 import { bold, inlineCode, italic, SlashCommandSubcommandBuilder, time } from '@discordjs/builders';
 import dayjs from 'dayjs';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
-import { cleanCharacterName } from 'laifutil';
+import { BadgeRarity, cleanCharacterName } from 'laifutil';
 import { MISSING_INFO } from '../../../constants';
 import { User } from '../../../model';
 import { Pages } from '../../../structures';
@@ -120,7 +120,8 @@ function createLines(arr: BotTypes.GachaResult[]): string[] {
                 `${inlineCode(`(${e.result.globalId})`)}・${time(e.result.createdAt, 'R')}`
             );
         } else if (isGachaResultBadgeSchema(e.result)) {
-            return italic('BADGE SUPPORT WIP');
+            const rarityName = BadgeRarity[e.result.tier].replace('_', ' ');
+            return `${bold(`Badge${e.result.badgeId}`)}・${inlineCode(rarityName)} ${e.result.title}`;
         } else {
             return italic('ERROR');
         }

@@ -83,6 +83,7 @@ declare global {
         interface GachaResultBadgeSchema {
             tier: number;
             badgeId: number;
+            title: string;
         }
 
         interface GachaResultCharacterSchema {

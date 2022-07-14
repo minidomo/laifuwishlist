@@ -18,7 +18,7 @@ export function fromInfoEmbed(embed: InfoEmbed): BotTypes.PartialCharacterSchema
         name: embed.name,
         id: embed.globalId,
         influence: embed.influence,
-        influenceRankRange: clone(embed.influenceRankRange),
+        influenceRankRange: clone(embed.rankRange),
         rarities: clone(embed.rarities),
         series: {
             title: {

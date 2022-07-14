@@ -14,12 +14,15 @@ export async function run(message: Message) {
     if (isLaifuBot(message)) {
         if (isDropOpenedEmbed(srcEmbed)) {
             const embed = new DropOpenedEmbed(srcEmbed);
-            const user = await User.findOne({ id: embed.userId }).select('reminder.drop').lean();
 
-            if (user && user.reminder.drop) {
-                await setTimeout(dropInterval);
-                const content = `Time to drop! ${userMention(embed.userId)}`;
-                message.reply({ content });
+            if (embed.userId) {
+                const user = await User.findOne({ id: embed.userId }).select('reminder.drop').lean();
+
+                if (user && user.reminder.drop) {
+                    await setTimeout(dropInterval);
+                    const content = `Time to drop! ${userMention(embed.userId)}`;
+                    message.reply({ content });
+                }
             }
         } else if (isMedalDropActiveEmbed(srcEmbed)) {
             const filter: Record<string, boolean> = {};
