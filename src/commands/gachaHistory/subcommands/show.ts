@@ -121,7 +121,10 @@ function createLines(arr: BotTypes.GachaResult[]): string[] {
             );
         } else if (isGachaResultBadgeSchema(e.result)) {
             const rarityName = BadgeRarity[e.result.tier].replace('_', ' ');
-            return `${bold(`Badge${e.result.badgeId}`)}・${inlineCode(rarityName)} ${e.result.title}`;
+            return `${e.result.badgeId} [${inlineCode(rarityName)}] ${e.result.title}・${time(
+                e.result.createdAt,
+                'R',
+            )}`;
         } else {
             return italic('ERROR');
         }
