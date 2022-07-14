@@ -1,5 +1,5 @@
 dist/
 node_modules/
 logs/
-temp/*.json
-*.js
+temp/
+package*.json

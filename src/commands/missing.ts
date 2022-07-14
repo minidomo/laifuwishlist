@@ -23,7 +23,8 @@ export async function execute(interaction: CommandInteraction, _unique: BotTypes
     const maxId = options.getInteger('max_global_id', true);
     const description = await createDescription(maxId);
 
-    const embed = new MessageEmbed().setColor(0xed6a5a).setTitle('Missing Information').setDescription(description);
+    const embed = new MessageEmbed().setColor(0xed6a5a).setTitle('Missing Information')
+.setDescription(description);
 
     await interaction.editReply({
         embeds: [embed],

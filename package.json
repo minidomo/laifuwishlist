@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "main": "dist/index.js",
     "scripts": {
+        "prettier": "prettier --write .",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "prebuild": "rimraf dist && npm run lint:fix",
@@ -24,20 +25,20 @@
         "discord-api-types": "^0.36.1",
         "discord.js": "^13.8.1",
         "dotenv": "^16.0.1",
-        "laifutil": "^2.0.1",
-        "mongoose": "^6.4.3",
+        "laifutil": "^2.1.1",
+        "mongoose": "^6.4.4",
         "winston": "^3.8.1"
     },
     "devDependencies": {
-        "@types/node": "^18.0.2",
-        "@typescript-eslint/eslint-plugin": "^5.30.5",
-        "@typescript-eslint/parser": "^5.30.5",
+        "@types/node": "^18.0.4",
+        "@typescript-eslint/eslint-plugin": "^5.30.6",
+        "@typescript-eslint/parser": "^5.30.6",
         "eslint": "^8.19.0",
         "eslint-config-prettier": "^8.5.0",
         "eslint-plugin-import": "^2.26.0",
         "prettier": "2.7.1",
         "rimraf": "^3.0.2",
-        "ts-node": "^10.8.2",
+        "ts-node": "^10.9.1",
         "typescript": "^4.7.4"
     }
 }
