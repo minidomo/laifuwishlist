@@ -14,6 +14,8 @@ export async function toGachaResultArray(arr: BotTypes.GachaResultSchema[]): Pro
             } as BotTypes.GachaResult),
     );
 
+    arr.filter(isGachaResultBadgeSchema).forEach(e => ret.push({ result: e }));
+
     return ret;
 }
 
