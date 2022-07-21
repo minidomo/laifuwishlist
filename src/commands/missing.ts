@@ -24,7 +24,7 @@ export async function execute(interaction: ChatInputCommandInteraction, _unique:
     const description = await createDescription(maxId);
 
     const embed = new EmbedBuilder().setColor(0xed6a5a).setTitle('Missing Information')
-.setDescription(description);
+        .setDescription(description);
 
     await interaction.editReply({
         embeds: [embed],
@@ -36,7 +36,7 @@ export function isPermitted(_interaction: ChatInputCommandInteraction): boolean 
     return true;
 }
 
-async function createDescription(maxId: number): Promise<string> {
+async function createDescription(maxId: number): Promise<string | null> {
     const ids: string[] = [];
     let consecutive = 0;
 
@@ -59,5 +59,5 @@ async function createDescription(maxId: number): Promise<string> {
         }
     }
 
-    return ids.join(', ');
+    return ids.length > 0 ? ids.join(', ') : 'No missing characters found';
 }
