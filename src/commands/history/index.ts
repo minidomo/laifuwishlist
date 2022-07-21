@@ -11,7 +11,7 @@ export const data = new SlashCommandBuilder()
     .addSubcommand(stats.data)
     .addSubcommand(show.data)
     .addSubcommand(toggle.data)
-    .setName('gachahistory')
+    .setName('history')
     .setDescription('Track your gachas');
 
 export async function execute(interaction: ChatInputCommandInteraction, unique: BotTypes.Unique) {
