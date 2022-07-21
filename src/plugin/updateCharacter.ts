@@ -15,7 +15,7 @@ import {
 import { Character } from '../model';
 import { CharacterSchema } from '../util';
 
-export function run(message: Message | PartialMessage) {
+export async function run(message: Message | PartialMessage) {
     if (!message.guild) return;
 
     if (message.author && !isLaifuBot(message.author.id)) return;
