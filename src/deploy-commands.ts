@@ -1,5 +1,5 @@
 import { REST } from '@discordjs/rest';
-import { RESTPostAPIApplicationCommandsJSONBody, Routes } from 'discord-api-types/v9';
+import { RESTPostAPIApplicationCommandsJSONBody, Routes } from 'discord.js';
 import { commands } from './commands';
 import { clientId, guildsIds, token } from './config';
 import { handleError, logger } from './util';
@@ -7,7 +7,7 @@ import { handleError, logger } from './util';
 const commandsJson: RESTPostAPIApplicationCommandsJSONBody[] = [];
 commands.forEach(command => commandsJson.push(command.data.toJSON()));
 
-const rest = new REST({ version: '9' }).setToken(token);
+const rest = new REST({ version: '10' }).setToken(token);
 
 guildsIds.forEach(guildId => {
     logger.info(`Started refreshing application (/) commands: ${guildId}`);

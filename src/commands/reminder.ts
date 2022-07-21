@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import { findUser } from '../util';
 
 type ReminderType = 'drop' | 'medal';
@@ -24,7 +24,7 @@ export const data = new SlashCommandBuilder()
     .setDescription('Enable/disable reminders');
 
 // eslint-disable-next-line
-export async function execute(interaction: CommandInteraction, _unique: BotTypes.Unique) {
+export async function execute(interaction: ChatInputCommandInteraction, _unique: BotTypes.Unique) {
     const { options, user } = interaction;
 
     const reminderType = options.getString('type') as ReminderType;
@@ -63,6 +63,6 @@ export async function execute(interaction: CommandInteraction, _unique: BotTypes
 }
 
 // eslint-disable-next-line
-export function isPermitted(_interaction: CommandInteraction): boolean {
+export function isPermitted(_interaction: ChatInputCommandInteraction): boolean {
     return true;
 }

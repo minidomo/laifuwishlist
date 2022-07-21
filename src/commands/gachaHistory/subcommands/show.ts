@@ -1,6 +1,6 @@
 import { bold, inlineCode, italic, SlashCommandSubcommandBuilder, time } from '@discordjs/builders';
 import dayjs from 'dayjs';
-import { CommandInteraction, MessageEmbed } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { BadgeRarity, cleanCharacterName } from 'laifutil';
 import { MISSING_INFO } from '../../../constants';
 import { User } from '../../../model';
@@ -23,7 +23,7 @@ export const data = new SlashCommandSubcommandBuilder()
     .setName('show')
     .setDescription('View your gacha history');
 
-export async function execute(interaction: CommandInteraction, unique: BotTypes.Unique) {
+export async function execute(interaction: ChatInputCommandInteraction, unique: BotTypes.Unique) {
     await interaction.deferReply();
 
     const { options, user } = interaction;
@@ -41,7 +41,7 @@ export async function execute(interaction: CommandInteraction, unique: BotTypes.
 
         const lines = createLines(arr);
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
             .setTitle(`Gacha History - ${user.username}`);
 
@@ -60,7 +60,7 @@ export async function execute(interaction: CommandInteraction, unique: BotTypes.
 }
 
 // eslint-disable-next-line
-export function isPermitted(_interaction: CommandInteraction) {
+export function isPermitted(_interaction: ChatInputCommandInteraction) {
     return true;
 }
 

@@ -1,4 +1,4 @@
-import { Client, Intents } from 'discord.js';
+import { Client, GatewayIntentBits } from 'discord.js';
 import { connect, connection } from 'mongoose';
 import { commands } from './commands';
 import { databaseUri, token } from './config';
@@ -11,7 +11,9 @@ connection.once('open', () => {
     logger.info(`Connected to ${databaseUri}`);
 });
 
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] }) as Client<true>;
+const client = new Client({
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
+}) as Client<true>;
 
 client.once('ready', () => {
     logger.info(`Logged in as ${client.user.tag}`);
@@ -32,7 +34,7 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
 client.on('interactionCreate', interaction => {
     if (!interaction.guild) return;
 
-    if (interaction.isCommand()) {
+    if (interaction.isChatInputCommand()) {
         const command = commands.get(interaction.commandName) as BotTypes.Command;
         if (command.isPermitted(interaction)) {
             command.execute(interaction, CustomId.createUnique());

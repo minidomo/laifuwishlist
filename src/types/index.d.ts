@@ -3,7 +3,7 @@ import {
     SlashCommandSubcommandBuilder,
     SlashCommandSubcommandsOnlyBuilder,
 } from '@discordjs/builders';
-import { CommandInteraction, MessageEmbed, ModalSubmitInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder, ModalSubmitInteraction } from 'discord.js';
 import type { Document, LeanDocument } from 'mongoose';
 
 declare global {
@@ -15,8 +15,8 @@ declare global {
 
         interface BaseCommand<T> {
             data: T;
-            execute: (interaction: CommandInteraction, unique: Unique) => Promise<void>;
-            isPermitted: (interaction: CommandInteraction) => boolean;
+            execute: (interaction: ChatInputCommandInteraction, unique: Unique) => Promise<void>;
+            isPermitted: (interaction: ChatInputCommandInteraction) => boolean;
         }
 
         type Command = BaseCommand<SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder>;
@@ -133,11 +133,11 @@ declare global {
 
         // Pages
         interface PagesOptions {
-            interaction: CommandInteraction | ModalSubmitInteraction;
+            interaction: ChatInputCommandInteraction | ModalSubmitInteraction;
             unique: Unique;
             lines: string[];
             itemName: string;
-            embed?: MessageEmbed;
+            embed?: EmbedBuilder;
             linesPerPage?: number;
             idleTime?: number;
         }

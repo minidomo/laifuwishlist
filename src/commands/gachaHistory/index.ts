@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import * as show from './subcommands/show';
 import * as stats from './subcommands/stats';
 import * as toggle from './subcommands/toggle';
@@ -14,7 +14,7 @@ export const data = new SlashCommandBuilder()
     .setName('gachahistory')
     .setDescription('Track your gachas');
 
-export async function execute(interaction: CommandInteraction, unique: BotTypes.Unique) {
+export async function execute(interaction: ChatInputCommandInteraction, unique: BotTypes.Unique) {
     const { options } = interaction;
 
     const subcommandName = options.getSubcommand();
@@ -26,6 +26,6 @@ export async function execute(interaction: CommandInteraction, unique: BotTypes.
 }
 
 // eslint-disable-next-line
-export function isPermitted(_interaction: CommandInteraction): boolean {
+export function isPermitted(_interaction: ChatInputCommandInteraction): boolean {
     return true;
 }
