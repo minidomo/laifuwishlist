@@ -1,12 +1,13 @@
 import { inlineCode, SlashCommandBuilder } from '@discordjs/builders';
 import {
-    CommandInteraction,
+    ChatInputCommandInteraction,
     Guild,
-    MessageActionRow,
-    MessageEmbed,
-    Modal,
+    EmbedBuilder,
     ModalSubmitInteraction,
-    TextInputComponent,
+    TextInputBuilder,
+    ActionRowBuilder,
+    TextInputStyle,
+    ModalBuilder,
 } from 'discord.js';
 import { cleanCharacterName } from 'laifutil';
 import { MISSING_INFO } from '../constants';
@@ -16,7 +17,7 @@ import { createCharacterMap, CustomId, findUser, handleError } from '../util';
 type Category = 'series' | 'characters';
 
 interface Args {
-    interaction: CommandInteraction;
+    interaction: ChatInputCommandInteraction;
     unique: BotTypes.Unique;
     action: BotTypes.Modification;
     category: Category;
@@ -54,26 +55,26 @@ export const data = new SlashCommandBuilder()
     .setName('modify')
     .setDescription('Add or remove characters or series to your wishlist');
 
-export async function execute(interaction: CommandInteraction, unique: BotTypes.Unique) {
+export async function execute(interaction: ChatInputCommandInteraction, unique: BotTypes.Unique) {
     const { options } = interaction;
 
     const action = options.getString('action') as BotTypes.Modification;
     const category = options.getString('category') as Category;
-    const modal = createModal(unique, action, category);
+    const modal = createModalBuilder(unique, action, category);
 
     await interaction.showModal(modal);
 
-    handleModal({ interaction, unique, action, category });
+    handleModalBuilder({ interaction, unique, action, category });
 }
 
 // eslint-disable-next-line
-export function isPermitted(_interaction: CommandInteraction): boolean {
+export function isPermitted(_interaction: ChatInputCommandInteraction): boolean {
     return true;
 }
 
-function createMessageActionRow(unique: BotTypes.Unique, category: Category): MessageActionRow<TextInputComponent> {
+function createActionRowBuilder(unique: BotTypes.Unique, category: Category): ActionRowBuilder<TextInputBuilder> {
     const customId = CustomId.createCustomId(unique, `${category}input`);
-    const input = new TextInputComponent().setStyle('PARAGRAPH');
+    const input = new TextInputBuilder().setStyle(TextInputStyle.Paragraph);
 
     if (category === 'characters') {
         input
@@ -84,22 +85,22 @@ function createMessageActionRow(unique: BotTypes.Unique, category: Category): Me
         input.setCustomId(customId).setLabel('Series IDs').setPlaceholder('351\n56');
     }
 
-    return new MessageActionRow<TextInputComponent>().addComponents(input);
+    return new ActionRowBuilder<TextInputBuilder>().addComponents(input);
 }
 
-function createModal(unique: BotTypes.Unique, action: BotTypes.Modification, category: Category): Modal {
+function createModalBuilder(unique: BotTypes.Unique, action: BotTypes.Modification, category: Category): ModalBuilder {
     const modalCustomId = CustomId.createCustomId(unique, category);
 
     const title = action === 'add' ? 'Add to wishlist' : 'Remove from wishlist';
 
-    const modal = new Modal().setTitle(title).setCustomId(modalCustomId);
+    const modal = new ModalBuilder().setTitle(title).setCustomId(modalCustomId);
 
-    modal.addComponents(createMessageActionRow(unique, category));
+    modal.addComponents(createActionRowBuilder(unique, category));
 
     return modal;
 }
 
-function handleModal(args: Args) {
+function handleModalBuilder(args: Args) {
     const { interaction, unique, action, category } = args;
 
     function filter(i: ModalSubmitInteraction): boolean {
@@ -132,7 +133,7 @@ function handleModal(args: Args) {
             const title = action === 'add' ? 'Added to wishlist' : 'Removed from wishlist';
             const color = action === 'add' ? 0x7bf1a8 : 0xff5376;
 
-            const embed = new MessageEmbed().setColor(color).setTitle(title);
+            const embed = new EmbedBuilder().setColor(color).setTitle(title);
 
             const pages = new Pages({
                 interaction: i,

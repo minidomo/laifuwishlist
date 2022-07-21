@@ -1,6 +1,6 @@
 import { bold, EmbedFooterData, inlineCode, SlashCommandSubcommandBuilder } from '@discordjs/builders';
 import dayjs from 'dayjs';
-import { CommandInteraction, MessageEmbed } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { CharacterRarity, CharacterRarityKey, CharacterRaritySymbol, resolveCharacterRarity } from 'laifutil';
 import { INFLUENCE_EMOJI } from '../../../constants';
 import { User } from '../../../model';
@@ -20,7 +20,7 @@ export const data = new SlashCommandSubcommandBuilder()
     .setDescription('Show statistics of your gachas');
 
 // eslint-disable-next-line
-export async function execute(interaction: CommandInteraction, _unique: BotTypes.Unique) {
+export async function execute(interaction: ChatInputCommandInteraction, _unique: BotTypes.Unique) {
     await interaction.deferReply();
 
     const { options, user } = interaction;
@@ -34,10 +34,12 @@ export async function execute(interaction: CommandInteraction, _unique: BotTypes
     if (targetUser) {
         const arr = await toGachaResultArray(filter(targetUser.gachaHistory.history, filterType));
 
-        const embed = new MessageEmbed()
-            .addField('Rarity', rarityStats(arr), true)
-            .addField('Influence', influenceStats(arr), true)
-            .addField('Other', otherStats(arr))
+        const embed = new EmbedBuilder()
+            .addFields([
+                { name: 'Rarity', value: rarityStats(arr), inline: true },
+                { name: 'Influence', value: influenceStats(arr), inline: true },
+                { name: 'Other', value: otherStats(arr) },
+            ])
             .setFooter(createFooter(arr))
             .setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
             .setTitle(`Gacha History Statistics - ${user.username}`);
@@ -51,7 +53,7 @@ export async function execute(interaction: CommandInteraction, _unique: BotTypes
 }
 
 // eslint-disable-next-line
-export function isPermitted(_interaction: CommandInteraction) {
+export function isPermitted(_interaction: ChatInputCommandInteraction) {
     return true;
 }
 

@@ -1,4 +1,4 @@
-import { Message, MessageEmbed, PartialMessage } from 'discord.js';
+import { EmbedBuilder, Message, PartialMessage } from 'discord.js';
 import {
     BasePersonalSimpleCharacterEmbed,
     BurnCharacterEmbed,
@@ -53,7 +53,7 @@ export async function run(newMessage: Message | PartialMessage, oldMessage?: Mes
         const userIds = Array.from(userIdSet);
 
         if (userIds.length > 0) {
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setColor(0xc7efcf)
                 .setTitle('Users that may be interested')
                 .setDescription(userIds.map(id => `<@${id}>`).join(' '));

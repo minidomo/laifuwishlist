@@ -1,5 +1,5 @@
 import { bold, inlineCode, SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction, MessageEmbed } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { cleanCharacterName } from 'laifutil';
 import { INFLUENCE_EMOJI, MISSING_INFO } from '../constants';
 import { User } from '../model';
@@ -32,7 +32,7 @@ export const data = new SlashCommandBuilder()
     .setName('wishlist')
     .setDescription("Shows a user's wishlist");
 
-export async function execute(interaction: CommandInteraction, unique: BotTypes.Unique) {
+export async function execute(interaction: ChatInputCommandInteraction, unique: BotTypes.Unique) {
     await interaction.deferReply();
 
     const { options, user } = interaction;
@@ -46,7 +46,7 @@ export async function execute(interaction: CommandInteraction, unique: BotTypes.
     if (userDoc) {
         const lines = await createLines(category, userDoc);
 
-        const embed = new MessageEmbed().setColor(0x28c2ff).setAuthor({
+        const embed = new EmbedBuilder().setColor(0x28c2ff).setAuthor({
             name: `${targetUser.username}'s Wishlist: ${capitalize(category)}`,
             iconURL: user.avatarURL() ?? user.defaultAvatarURL,
         });
@@ -66,7 +66,7 @@ export async function execute(interaction: CommandInteraction, unique: BotTypes.
 }
 
 // eslint-disable-next-line
-export function isPermitted(_interaction: CommandInteraction): boolean {
+export function isPermitted(_interaction: ChatInputCommandInteraction): boolean {
     return true;
 }
 

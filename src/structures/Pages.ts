@@ -1,10 +1,12 @@
 import type { EmbedFooterData } from '@discordjs/builders';
 import {
-    CommandInteraction,
-    MessageActionRow,
-    MessageButton,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    ChatInputCommandInteraction,
+    ComponentType,
+    EmbedBuilder,
     MessageComponentInteraction,
-    MessageEmbed,
     ModalSubmitInteraction,
     TextChannel,
 } from 'discord.js';
@@ -23,15 +25,15 @@ function clamp(lower: number, upper: number, value: number) {
 }
 
 export class Pages {
-    readonly interaction: CommandInteraction | ModalSubmitInteraction;
+    readonly interaction: ChatInputCommandInteraction | ModalSubmitInteraction;
     readonly unique: BotTypes.Unique;
     readonly lines: string[];
     readonly itemName: string;
-    readonly embed: MessageEmbed;
+    readonly embed: EmbedBuilder;
     readonly linesPerPage: number;
     readonly idleTime: number;
 
-    private row: MessageActionRow;
+    private row: ActionRowBuilder<ButtonBuilder>;
     private currentPage: number;
     private lastPage: number;
 
@@ -43,11 +45,14 @@ export class Pages {
         this.unique = data.unique;
         this.lines = data.lines;
         this.itemName = data.itemName;
-        this.embed = data.embed ?? new MessageEmbed();
+        this.embed = data.embed ?? new EmbedBuilder();
         this.linesPerPage = data.linesPerPage ?? Pages.LINES_PER_PAGE;
         this.idleTime = data.idleTime ?? Pages.IDLE_TIME;
 
-        this.row = new MessageActionRow().addComponents(this.createButton('prev'), this.createButton('next'));
+        this.row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            this.createButton('prev'),
+            this.createButton('next'),
+        );
         this.currentPage = 1;
         this.lastPage = Math.max(1, Math.ceil(this.lines.length / this.linesPerPage));
     }
@@ -75,17 +80,18 @@ export class Pages {
         this.handleEvents();
     }
 
-    private createButton(label: ButtonLabel): MessageButton {
-        return new MessageButton()
-            .setStyle('PRIMARY')
+    private createButton(label: ButtonLabel): ButtonBuilder {
+        return new ButtonBuilder()
+            .setStyle(ButtonStyle.Primary)
             .setCustomId(CustomId.createCustomId(this.unique, label))
             .setLabel(capitalize(label));
     }
 
-    private createDescription(): string {
+    private createDescription(): string | null {
         const lowerIndex = (this.currentPage - 1) * this.linesPerPage;
         const upperIndex = Math.min(this.currentPage * this.linesPerPage - 1, this.lines.length - 1);
-        return this.lines.slice(lowerIndex, upperIndex + 1).join('\n');
+        const res = this.lines.slice(lowerIndex, upperIndex + 1).join('\n');
+        return res.length > 0 ? res : null;
     }
 
     private createFooter(): EmbedFooterData {
@@ -113,7 +119,7 @@ export class Pages {
 
         const channel = this.interaction.channel as TextChannel;
         const collector = channel.createMessageComponentCollector({
-            componentType: 'BUTTON',
+            componentType: ComponentType.Button,
             idle: this.idleTime,
             filter,
         });

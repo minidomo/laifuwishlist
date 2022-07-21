@@ -1,5 +1,5 @@
 import { SlashCommandSubcommandBuilder } from '@discordjs/builders';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import { findUser } from '../../../util';
 
 export const data = new SlashCommandSubcommandBuilder()
@@ -7,7 +7,7 @@ export const data = new SlashCommandSubcommandBuilder()
     .setDescription('Enable/disable tracking history of your gachas');
 
 // eslint-disable-next-line
-export async function execute(interaction: CommandInteraction, _unique: BotTypes.Unique) {
+export async function execute(interaction: ChatInputCommandInteraction, _unique: BotTypes.Unique) {
     const { user } = interaction;
 
     const targetUser = await findUser(user.id);
@@ -21,6 +21,6 @@ export async function execute(interaction: CommandInteraction, _unique: BotTypes
 }
 
 // eslint-disable-next-line
-export function isPermitted(_interaction: CommandInteraction) {
+export function isPermitted(_interaction: ChatInputCommandInteraction) {
     return true;
 }

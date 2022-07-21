@@ -1,5 +1,5 @@
 import { hyperlink, SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction, MessageEmbed } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 
 const description = [
     'This bot is a custom wishlist container for LaifuBot and an external character database. ',
@@ -27,11 +27,11 @@ export const data = new SlashCommandBuilder()
     .setDescription('Shows all commmands and information about the bot');
 
 // eslint-disable-next-line
-export async function execute(interaction: CommandInteraction, _unique: BotTypes.Unique) {
-    const embed = new MessageEmbed()
+export async function execute(interaction: ChatInputCommandInteraction, _unique: BotTypes.Unique) {
+    const embed = new EmbedBuilder()
         .setTitle('Help Information')
         .setColor(0xbc96e6)
-        .addField('Commands', everyoneCommands)
+        .addFields([{ name: 'Commands', value: everyoneCommands }])
         .setDescription(description)
         .setFooter({ text: 'Developed by JB#9224' });
 
@@ -41,6 +41,6 @@ export async function execute(interaction: CommandInteraction, _unique: BotTypes
 }
 
 // eslint-disable-next-line
-export function isPermitted(_interaction: CommandInteraction): boolean {
+export function isPermitted(_interaction: ChatInputCommandInteraction): boolean {
     return true;
 }

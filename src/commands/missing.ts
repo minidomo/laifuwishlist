@@ -1,5 +1,5 @@
 import { inlineCode, SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction, MessageEmbed } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { Character } from '../model';
 
 export const data = new SlashCommandBuilder()
@@ -15,7 +15,7 @@ export const data = new SlashCommandBuilder()
     .setDescription('Shows the global IDs that are missing in the database');
 
 // eslint-disable-next-line
-export async function execute(interaction: CommandInteraction, _unique: BotTypes.Unique) {
+export async function execute(interaction: ChatInputCommandInteraction, _unique: BotTypes.Unique) {
     const { options } = interaction;
 
     await interaction.deferReply();
@@ -23,7 +23,7 @@ export async function execute(interaction: CommandInteraction, _unique: BotTypes
     const maxId = options.getInteger('max_global_id', true);
     const description = await createDescription(maxId);
 
-    const embed = new MessageEmbed().setColor(0xed6a5a).setTitle('Missing Information')
+    const embed = new EmbedBuilder().setColor(0xed6a5a).setTitle('Missing Information')
 .setDescription(description);
 
     await interaction.editReply({
@@ -32,7 +32,7 @@ export async function execute(interaction: CommandInteraction, _unique: BotTypes
 }
 
 // eslint-disable-next-line
-export function isPermitted(_interaction: CommandInteraction): boolean {
+export function isPermitted(_interaction: ChatInputCommandInteraction): boolean {
     return true;
 }
 
