@@ -16,27 +16,29 @@ import { handleError, CharacterSchema } from '../util';
 export function run(message: Message | PartialMessage) {
     if (!message.guild) return;
 
-    const srcEmbed = message.embeds[0];
+    if (message.author && !isLaifuBot(message.author.id)) return;
 
-    if (srcEmbed && isLaifuBot(message)) {
-        let schemaData: BotTypes.PartialCharacterSchema | undefined;
+    const srcEmbed = message.embeds[0]?.toJSON();
 
-        if (isInfoEmbed(srcEmbed)) {
-            const embed = new InfoEmbed(srcEmbed);
-            schemaData = CharacterSchema.fromInfoEmbed(embed);
-        } else if (isGachaCharacterEmbed(srcEmbed)) {
-            const embed = new GachaCharacterEmbed(srcEmbed);
-            schemaData = CharacterSchema.fromSimpleCharacter(embed);
-        } else if (isViewEmbed(srcEmbed)) {
-            const embed = new ViewEmbed(srcEmbed);
-            schemaData = CharacterSchema.fromSimpleCharacter(embed);
-        } else if (isBurnCharacterEmbed(srcEmbed)) {
-            const embed = new BurnCharacterEmbed(srcEmbed);
-            schemaData = CharacterSchema.fromSimpleCharacter(embed);
-        }
+    if (!srcEmbed) return;
 
-        if (schemaData) {
-            Character.updateOne({ id: schemaData.id }, schemaData, { upsert: true }, err => handleError(err as Error));
-        }
+    let schemaData: BotTypes.PartialCharacterSchema | undefined;
+
+    if (isInfoEmbed(srcEmbed)) {
+        const embed = new InfoEmbed(srcEmbed);
+        schemaData = CharacterSchema.fromInfoEmbed(embed);
+    } else if (isGachaCharacterEmbed(srcEmbed)) {
+        const embed = new GachaCharacterEmbed(srcEmbed);
+        schemaData = CharacterSchema.fromSimpleCharacter(embed);
+    } else if (isViewEmbed(srcEmbed)) {
+        const embed = new ViewEmbed(srcEmbed);
+        schemaData = CharacterSchema.fromSimpleCharacter(embed);
+    } else if (isBurnCharacterEmbed(srcEmbed)) {
+        const embed = new BurnCharacterEmbed(srcEmbed);
+        schemaData = CharacterSchema.fromSimpleCharacter(embed);
+    }
+
+    if (schemaData) {
+        Character.updateOne({ id: schemaData.id }, schemaData, { upsert: true }, err => handleError(err as Error));
     }
 }

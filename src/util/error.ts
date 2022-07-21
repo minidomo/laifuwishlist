@@ -1,7 +1,8 @@
 import { logger } from './logger';
 
-export function handleError(err?: Error) {
-    if (err && !err.message.endsWith('reason: time')) {
+// eslint-disable-next-line
+export function handleError(err: any) {
+    if (err instanceof Error && !err.message.endsWith('reason: time')) {
         let msg = `${err.name}: ${err.message}`;
 
         if (err.stack) {

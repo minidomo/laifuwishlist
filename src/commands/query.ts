@@ -1,7 +1,7 @@
 import { bold, inlineCode, SlashCommandBuilder } from '@discordjs/builders';
 import dayjs from 'dayjs';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
-import { Bounds, RarityStatistics, RarityConstants } from 'laifutil';
+import { Bounds, CharacterRarityStatistics, CharacterRaritySymbol } from 'laifutil';
 import { Character } from '../model';
 
 export const data = new SlashCommandBuilder()
@@ -35,7 +35,7 @@ export function isPermitted(_interaction: CommandInteraction): boolean {
     return true;
 }
 
-function createRarityString(rarity: RarityStatistics): string {
+function createRarityString(rarity: CharacterRarityStatistics): string {
     let burnRate = ((rarity.totalClaimed - rarity.existingAmount) / rarity.totalClaimed) * 100;
     if (rarity.totalClaimed === 0) {
         burnRate = 0;
@@ -66,18 +66,18 @@ function createCharacterEmbed(character: BotTypes.LeanCharacterDocument | null) 
             )
             .addField(
                 'Rarity Burn Rate',
-                `${bold(RarityConstants.ALPHA.SYMBOL)} ${createRarityString(character.rarities.alpha)}\n${bold(
-                    RarityConstants.BETA.SYMBOL,
+                `${bold(CharacterRaritySymbol.ALPHA)} ${createRarityString(character.rarities.alpha)}\n${bold(
+                    CharacterRaritySymbol.BETA,
                 )} ${createRarityString(character.rarities.beta)}\n${bold(
-                    RarityConstants.GAMMA.SYMBOL,
+                    CharacterRaritySymbol.GAMMA,
                 )} ${createRarityString(character.rarities.gamma)}\n${bold(
-                    RarityConstants.DELTA.SYMBOL,
+                    CharacterRaritySymbol.DELTA,
                 )} ${createRarityString(character.rarities.delta)}\n${bold(
-                    RarityConstants.EPSILON.SYMBOL,
+                    CharacterRaritySymbol.EPSILON,
                 )} ${createRarityString(character.rarities.epsilon)}\n${bold(
-                    RarityConstants.ZETA.SYMBOL,
+                    CharacterRaritySymbol.ZETA,
                 )} ${createRarityString(character.rarities.zeta)}\n${bold(
-                    RarityConstants.ULTRA.SYMBOL,
+                    CharacterRaritySymbol.ULTRA,
                 )} ${createRarityString(character.rarities.ultra)}\n`,
                 true,
             )

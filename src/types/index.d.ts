@@ -62,17 +62,19 @@ declare global {
             sequence: string;
         }
 
-        interface PartialCharacterSchema extends Partial<MongoTimestamps> {
+        interface PartialCharacterSchema extends Partial<CharacterSchema> {
+            [key: string]: any; // eslint-disable-line
+        }
+
+        interface CharacterSchema extends MongoTimestamps {
             name: string;
             id: number;
             influence: number;
-            influenceRankRange?: InfluenceRankRangeSchema;
-            rarities?: RarityInfoCollectionSchema;
+            influenceRankRange: InfluenceRankRangeSchema;
+            rarities: RarityInfoCollectionSchema;
             series: SeriesSchema;
-            totalImages?: number;
+            totalImages: number;
         }
-
-        type CharacterSchema = Required<PartialCharacterSchema>;
 
         // User schema and documents
         type UserDocument = Document<unknown, any, UserSchema> & UserSchema & MongoTimestamps; // eslint-disable-line

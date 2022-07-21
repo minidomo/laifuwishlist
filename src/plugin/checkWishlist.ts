@@ -15,48 +15,50 @@ import { User } from '../model';
 export async function run(newMessage: Message | PartialMessage, oldMessage?: Message | PartialMessage) {
     if (!newMessage.guild) return;
 
-    const srcEmbed = newMessage.embeds[0];
-    const oldEmbed = oldMessage?.embeds[0];
+    if (newMessage.author && !isLaifuBot(newMessage.author.id)) return;
 
-    if (srcEmbed && oldEmbed && hasSameImage(srcEmbed, oldEmbed)) return;
+    const srcEmbed = newMessage.embeds[0]?.toJSON();
+    const oldEmbed = oldMessage?.embeds[0]?.toJSON();
 
-    if (srcEmbed && isLaifuBot(newMessage)) {
-        let charEmbed: BasePersonalSimpleCharacterEmbed | null = null;
+    if (!srcEmbed) return;
 
-        if (isGachaCharacterEmbed(srcEmbed)) {
-            charEmbed = new GachaCharacterEmbed(srcEmbed);
-        } else if (isBurnCharacterEmbed(srcEmbed)) {
-            charEmbed = new BurnCharacterEmbed(srcEmbed);
-        } else if (isViewEmbed(srcEmbed)) {
-            charEmbed = new ViewEmbed(srcEmbed);
-        }
+    if (oldEmbed && hasSameImage(srcEmbed, oldEmbed)) return;
 
-        if (charEmbed) {
-            const seriesFilter: Record<string, boolean> = {};
-            seriesFilter[`guildIds.${newMessage.guild.id}`] = true;
-            seriesFilter[`seriesIds.${charEmbed.series.id}`] = true;
+    let charEmbed: BasePersonalSimpleCharacterEmbed | null = null;
 
-            const characterFilter: Record<string, boolean | RegExp> = {};
-            characterFilter[`guildIds.${newMessage.guild.id}`] = true;
-            characterFilter[`globalIds.${charEmbed.globalId}`] = new RegExp(`${charEmbed.image.currentNumber}`);
+    if (isGachaCharacterEmbed(srcEmbed)) {
+        charEmbed = new GachaCharacterEmbed(srcEmbed);
+    } else if (isBurnCharacterEmbed(srcEmbed)) {
+        charEmbed = new BurnCharacterEmbed(srcEmbed);
+    } else if (isViewEmbed(srcEmbed)) {
+        charEmbed = new ViewEmbed(srcEmbed);
+    }
 
-            const seriesUsers = await User.find(seriesFilter).select('id').lean();
-            const characterUsers = await User.find(characterFilter).select('id').lean();
+    if (charEmbed) {
+        const seriesFilter: Record<string, boolean> = {};
+        seriesFilter[`guildIds.${newMessage.guild.id}`] = true;
+        seriesFilter[`seriesIds.${charEmbed.series.id}`] = true;
 
-            const userIdSet: Set<string> = new Set();
-            seriesUsers.forEach(e => userIdSet.add(e.id));
-            characterUsers.forEach(e => userIdSet.add(e.id));
+        const characterFilter: Record<string, boolean | RegExp> = {};
+        characterFilter[`guildIds.${newMessage.guild.id}`] = true;
+        characterFilter[`globalIds.${charEmbed.globalId}`] = new RegExp(`${charEmbed.image.currentNumber}`);
 
-            const userIds = Array.from(userIdSet);
+        const seriesUsers = await User.find(seriesFilter).select('id').lean();
+        const characterUsers = await User.find(characterFilter).select('id').lean();
 
-            if (userIds.length > 0) {
-                const embed = new MessageEmbed()
-                    .setColor(0xc7efcf)
-                    .setTitle('Users that may be interested')
-                    .setDescription(userIds.map(id => `<@${id}>`).join(' '));
+        const userIdSet: Set<string> = new Set();
+        seriesUsers.forEach(e => userIdSet.add(e.id));
+        characterUsers.forEach(e => userIdSet.add(e.id));
 
-                await newMessage.reply({ embeds: [embed] });
-            }
+        const userIds = Array.from(userIdSet);
+
+        if (userIds.length > 0) {
+            const embed = new MessageEmbed()
+                .setColor(0xc7efcf)
+                .setTitle('Users that may be interested')
+                .setDescription(userIds.map(id => `<@${id}>`).join(' '));
+
+            await newMessage.reply({ embeds: [embed] });
         }
     }
 }
