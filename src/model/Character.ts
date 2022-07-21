@@ -1,60 +1,45 @@
 import { model, Schema } from 'mongoose';
 
-const influenceRankRangeSchema = new Schema({
-    lower: { type: Number, required: true },
-    upper: { type: Number, required: true },
+const rankSchema = new Schema({
+    lower: { type: Number, default: -1 },
+    upper: { type: Number, default: -1 },
 });
 
 const rarityInfoSchema = new Schema({
-    existingAmount: { type: Number, required: true },
-    totalClaimed: { type: Number, required: true },
+    existingAmount: { type: Number, default: -1 },
+    totalClaimed: { type: Number, default: -1 },
 });
 
 const rarityInfoCollectionSchema = new Schema({
-    alpha: { type: rarityInfoSchema, required: true },
-    beta: { type: rarityInfoSchema, required: true },
-    delta: { type: rarityInfoSchema, required: true },
-    epsilon: { type: rarityInfoSchema, required: true },
-    gamma: { type: rarityInfoSchema, required: true },
-    ultra: { type: rarityInfoSchema, required: true },
-    zeta: { type: rarityInfoSchema, required: true },
+    alpha: { type: rarityInfoSchema, default: {} },
+    beta: { type: rarityInfoSchema, default: {} },
+    delta: { type: rarityInfoSchema, default: {} },
+    epsilon: { type: rarityInfoSchema, default: {} },
+    gamma: { type: rarityInfoSchema, default: {} },
+    ultra: { type: rarityInfoSchema, default: {} },
+    zeta: { type: rarityInfoSchema, default: {} },
 });
 
 const titleSchema = new Schema({
-    alternate: { type: String, required: true },
-    english: { type: String, required: true },
+    alternate: { type: String, default: '' },
+    english: { type: String, default: '' },
 });
 
 const seriesSchema = new Schema({
-    title: { type: titleSchema, required: true },
-    id: { type: Number, required: true },
-    sequence: { type: String, required: true },
+    title: { type: titleSchema, default: {} },
+    id: { type: Number, default: -1 },
+    sequence: { type: String, default: '' },
 });
-
-const raritiesDefault: BotTypes.RarityInfoCollectionSchema = {
-    alpha: { existingAmount: 0, totalClaimed: 0 },
-    beta: { existingAmount: 0, totalClaimed: 0 },
-    delta: { existingAmount: 0, totalClaimed: 0 },
-    epsilon: { existingAmount: 0, totalClaimed: 0 },
-    gamma: { existingAmount: 0, totalClaimed: 0 },
-    ultra: { existingAmount: 0, totalClaimed: 0 },
-    zeta: { existingAmount: 0, totalClaimed: 0 },
-};
-
-const influenceRankRangeDefault: BotTypes.InfluenceRankRangeSchema = {
-    lower: 0,
-    upper: 0,
-};
 
 const characterSchema = new Schema(
     {
-        name: { type: String, required: true },
+        name: { type: String, default: '' },
         id: { type: Number, required: true },
-        influence: { type: Number, required: true },
-        series: { type: seriesSchema, required: true },
-        influenceRankRange: { type: influenceRankRangeSchema, required: true, default: influenceRankRangeDefault },
-        rarities: { type: rarityInfoCollectionSchema, required: true, default: raritiesDefault },
-        totalImages: { type: Number, required: true, default: 0 },
+        influence: { type: Number, default: -1 },
+        series: { type: seriesSchema, default: {} },
+        rank: { type: rankSchema, default: {} },
+        rarities: { type: rarityInfoCollectionSchema, default: {} },
+        totalImages: { type: Number, default: -1 },
     },
     { timestamps: true },
 );

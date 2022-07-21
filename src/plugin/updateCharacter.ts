@@ -1,9 +1,11 @@
 import type { Message, PartialMessage } from 'discord.js';
 import {
     BurnCharacterEmbed,
+    CluSearchEmbed,
     GachaCharacterEmbed,
     InfoEmbed,
     isBurnCharacterEmbed,
+    isCluSearchEmbed,
     isGachaCharacterEmbed,
     isInfoEmbed,
     isLaifuBot,
@@ -11,7 +13,7 @@ import {
     ViewEmbed,
 } from 'laifutil';
 import { Character } from '../model';
-import { handleError, CharacterSchema } from '../util';
+import { CharacterSchema } from '../util';
 
 export function run(message: Message | PartialMessage) {
     if (!message.guild) return;
@@ -22,23 +24,31 @@ export function run(message: Message | PartialMessage) {
 
     if (!srcEmbed) return;
 
-    let schemaData: BotTypes.PartialCharacterSchema | undefined;
+    const dataArr: BotTypes.PartialCharacterSchema[] = [];
 
     if (isInfoEmbed(srcEmbed)) {
         const embed = new InfoEmbed(srcEmbed);
-        schemaData = CharacterSchema.fromInfoEmbed(embed);
+        dataArr.push(CharacterSchema.fromInfoEmbed(embed));
     } else if (isGachaCharacterEmbed(srcEmbed)) {
         const embed = new GachaCharacterEmbed(srcEmbed);
-        schemaData = CharacterSchema.fromSimpleCharacter(embed);
+        dataArr.push(CharacterSchema.fromSimpleCharacter(embed));
     } else if (isViewEmbed(srcEmbed)) {
         const embed = new ViewEmbed(srcEmbed);
-        schemaData = CharacterSchema.fromSimpleCharacter(embed);
+        dataArr.push(CharacterSchema.fromSimpleCharacter(embed));
     } else if (isBurnCharacterEmbed(srcEmbed)) {
         const embed = new BurnCharacterEmbed(srcEmbed);
-        schemaData = CharacterSchema.fromSimpleCharacter(embed);
+        dataArr.push(CharacterSchema.fromSimpleCharacter(embed));
+    } else if (isCluSearchEmbed(srcEmbed)) {
+        const embed = new CluSearchEmbed(srcEmbed);
+        embed.characters.forEach(e => dataArr.push(CharacterSchema.fromCluCharacter(e)));
     }
 
-    if (schemaData) {
-        Character.updateOne({ id: schemaData.id }, schemaData, { upsert: true }, err => handleError(err as Error));
-    }
+    dataArr.forEach(async e => {
+        const res = await Character.updateOne({ id: e.id }, e);
+
+        if (res.matchedCount !== 1) {
+            const character = new Character(e);
+            await character.save();
+        }
+    });
 }

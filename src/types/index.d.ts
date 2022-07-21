@@ -31,7 +31,7 @@ declare global {
         type CharacterDocument = Document<unknown, any, CharacterSchema> & CharacterSchema; // eslint-disable-line
         type LeanCharacterDocument = LeanDocument<CharacterSchema>;
 
-        interface InfluenceRankRangeSchema {
+        interface RankSchema {
             lower: number;
             upper: number;
         }
@@ -70,7 +70,7 @@ declare global {
             name: string;
             id: number;
             influence: number;
-            influenceRankRange: InfluenceRankRangeSchema;
+            rank: RankSchema;
             rarities: RarityInfoCollectionSchema;
             series: SeriesSchema;
             totalImages: number;
