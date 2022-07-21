@@ -1,5 +1,5 @@
-import * as gachaHistory from './gachaHistory';
 import * as help from './help';
+import * as history from './history';
 import * as missing from './missing';
 import * as modify from './modify';
 import * as ping from './ping';
@@ -9,7 +9,7 @@ import * as wishlist from './wishlist';
 
 export const commands: Map<string, BotTypes.Command> = new Map();
 commands
-    .set(gachaHistory.data.name, gachaHistory)
+    .set(history.data.name, history)
     .set(reminder.data.name, reminder)
     .set(modify.data.name, modify)
     .set(help.data.name, help)

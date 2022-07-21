@@ -15,9 +15,9 @@ const everyoneCommands = [
     'query',
     'reminder',
     'wishlist',
-    'gachahistory toggle',
-    'gachahistory show',
-    'gachahistory stats',
+    'history toggle',
+    'history show',
+    'history stats',
 ]
     .sort()
     .join(', ');
