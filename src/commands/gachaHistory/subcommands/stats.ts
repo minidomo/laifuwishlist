@@ -1,7 +1,7 @@
 import { bold, EmbedFooterData, inlineCode, SlashCommandSubcommandBuilder } from '@discordjs/builders';
 import dayjs from 'dayjs';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
-import { Rarity, RarityConstants } from 'laifutil';
+import { CharacterRarity, CharacterRarityKey, CharacterRaritySymbol, resolveCharacterRarity } from 'laifutil';
 import { INFLUENCE_EMOJI } from '../../../constants';
 import { User } from '../../../model';
 import { logger } from '../../../util';
@@ -72,32 +72,33 @@ function filter(arr: BotTypes.GachaResultSchema[], filterType: FilterType | null
 }
 
 function rarityStats(arr: BotTypes.GachaResult[]): string {
-    const rarityCount: Map<string, number> = new Map();
-    Object.values(RarityConstants).forEach((e: Rarity) => rarityCount.set(e.SYMBOL, 0));
+    const rarityCount: Map<CharacterRarityKey, number> = new Map();
+    Object.keys(CharacterRarity).forEach(key => rarityCount.set(key as unknown as CharacterRarityKey, 0));
 
     let characters = 0;
 
     arr.forEach(e => {
         if (isGachaResultCharacterSchema(e.result)) {
             characters++;
-            rarityCount.set(e.result.rarity, (rarityCount.get(e.result.rarity) as number) + 1);
+            const key = resolveCharacterRarity(e.result.rarity);
+            rarityCount.set(key, (rarityCount.get(key) as number) + 1);
         }
     });
 
-    function rarityLine(rarity: string): string {
+    function rarityLine(rarity: CharacterRarityKey): string {
         const count = rarityCount.get(rarity) as number;
         const percent = characters === 0 ? 0 : (count / characters) * 100;
-        return `${bold(rarity)}・${count} ${inlineCode(`${percent.toFixed(0)}%`)}`;
+        return `${bold(CharacterRaritySymbol[rarity])}・${count} ${inlineCode(`${percent.toFixed(0)}%`)}`;
     }
 
     const ret = [
-        rarityLine(RarityConstants.ALPHA.SYMBOL),
-        rarityLine(RarityConstants.BETA.SYMBOL),
-        rarityLine(RarityConstants.GAMMA.SYMBOL),
-        rarityLine(RarityConstants.DELTA.SYMBOL),
-        rarityLine(RarityConstants.EPSILON.SYMBOL),
-        rarityLine(RarityConstants.ZETA.SYMBOL),
-        rarityLine(RarityConstants.ULTRA.SYMBOL),
+        rarityLine('ALPHA'),
+        rarityLine('BETA'),
+        rarityLine('GAMMA'),
+        rarityLine('DELTA'),
+        rarityLine('EPSILON'),
+        rarityLine('ZETA'),
+        rarityLine('ULTRA'),
     ].join('\n');
 
     return ret;

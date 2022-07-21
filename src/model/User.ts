@@ -9,6 +9,7 @@ const reminderSchema = new Schema({
     medal: { type: Boolean, default: false },
 });
 
+// TODO update schema
 const gachaResultSchema = new Schema(
     {
         gachaType: { type: String, required: true, enum: ['badge', 'character'] },

@@ -1,5 +1,7 @@
 import type { Message, PartialMessage } from 'discord.js';
 import {
+    BadgeRarity,
+    CharacterRaritySymbol,
     GachaBadgeEmbed,
     GachaCharacterEmbed,
     hasSameImage,
@@ -10,14 +12,16 @@ import {
 import { User } from '../model';
 
 export async function run(newMessage: Message | PartialMessage, oldMessage: Message | PartialMessage) {
-    if (!newMessage.guild || !isLaifuBot(newMessage)) return;
+    if (!newMessage.guild) return;
 
-    const srcEmbed = newMessage.embeds[0];
-    const oldEmbed = oldMessage.embeds[0];
+    if (newMessage.author && !isLaifuBot(newMessage.author.id)) return;
 
-    if (srcEmbed && oldEmbed && hasSameImage(srcEmbed, oldEmbed)) return;
+    const srcEmbed = newMessage.embeds[0]?.toJSON();
+    const oldEmbed = oldMessage?.embeds[0]?.toJSON();
 
     if (!srcEmbed) return;
+
+    if (oldEmbed && hasSameImage(srcEmbed, oldEmbed)) return;
 
     if (isGachaCharacterEmbed(srcEmbed)) {
         const embed = new GachaCharacterEmbed(srcEmbed);
@@ -31,7 +35,7 @@ export async function run(newMessage: Message | PartialMessage, oldMessage: Mess
                     stonesUsed: embed.stonesUsed,
                     globalId: embed.globalId,
                     uniqueId: embed.uniqueId,
-                    rarity: embed.rarity.SYMBOL,
+                    rarity: CharacterRaritySymbol[embed.rarity],
                     image: embed.image.currentNumber,
                 };
 
@@ -50,7 +54,7 @@ export async function run(newMessage: Message | PartialMessage, oldMessage: Mess
                 const schemaData: BotTypes.PartialGachaResultSchema = {
                     gachaType: 'badge',
                     stonesUsed: embed.stonesUsed,
-                    tier: embed.rarity,
+                    tier: BadgeRarity[embed.rarity],
                     badgeId: embed.id,
                     title: embed.title,
                 };
