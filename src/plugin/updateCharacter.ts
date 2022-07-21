@@ -1,9 +1,11 @@
 import type { Message, PartialMessage } from 'discord.js';
 import {
+    AuctionEmbed,
     BurnCharacterEmbed,
     CluSearchEmbed,
     GachaCharacterEmbed,
     InfoEmbed,
+    isAuctionEmbed,
     isBurnCharacterEmbed,
     isCluSearchEmbed,
     isGachaCharacterEmbed,
@@ -41,6 +43,9 @@ export async function run(message: Message | PartialMessage) {
     } else if (isCluSearchEmbed(srcEmbed)) {
         const embed = new CluSearchEmbed(srcEmbed);
         embed.characters.forEach(e => dataArr.push(CharacterSchema.fromCluCharacter(e)));
+    } else if (isAuctionEmbed(srcEmbed)) {
+        const embed = new AuctionEmbed(srcEmbed);
+        dataArr.push(CharacterSchema.fromAuctionEmbed(embed));
     }
 
     dataArr.forEach(async e => {

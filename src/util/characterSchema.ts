@@ -1,4 +1,4 @@
-import type { BasePersonalSimpleCharacterEmbed, CluCharacter, InfoEmbed } from 'laifutil';
+import type { AuctionEmbed, BasePersonalSimpleCharacterEmbed, CluCharacter, InfoEmbed } from 'laifutil';
 
 type CloneableObject = Record<string, any>; // eslint-disable-line
 
@@ -55,5 +55,21 @@ export function fromCluCharacter(character: CluCharacter): BotTypes.PartialChara
         totalImages: character.totalImages,
         name: character.name,
         'series.title.english': character.title,
+    };
+}
+
+export function fromAuctionEmbed(embed: AuctionEmbed): BotTypes.PartialCharacterSchema {
+    return {
+        name: embed.name,
+        id: embed.globalId,
+        influence: embed.influence,
+        series: {
+            title: {
+                alternate: embed.series.title.alternate,
+                english: embed.series.title.english,
+            },
+            id: embed.series.id,
+            sequence: embed.series.sequence,
+        },
     };
 }
