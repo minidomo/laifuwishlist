@@ -3,7 +3,7 @@ import { connect, connection } from 'mongoose';
 import { commands } from './commands';
 import { databaseUri, token } from './config';
 import { CheckWishlist, GachaHistory, Reminders, UpdateCharacter } from './plugin';
-import { CustomId, logger } from './util';
+import { CustomId, handleError, logger } from './util';
 
 connect(databaseUri);
 
@@ -20,15 +20,23 @@ client.once('ready', () => {
 });
 
 client.on('messageCreate', message => {
-    UpdateCharacter.run(message);
-    CheckWishlist.run(message);
-    Reminders.run(message);
+    try {
+        UpdateCharacter.run(message);
+    } catch (err) {
+        handleError(err);
+    }
+    CheckWishlist.run(message).catch(handleError);
+    Reminders.run(message).catch(handleError);
 });
 
 client.on('messageUpdate', (oldMessage, newMessage) => {
-    UpdateCharacter.run(newMessage);
-    CheckWishlist.run(newMessage, oldMessage);
-    GachaHistory.run(newMessage, oldMessage);
+    try {
+        UpdateCharacter.run(newMessage);
+    } catch (err) {
+        handleError(err);
+    }
+    CheckWishlist.run(newMessage, oldMessage).catch(handleError);
+    GachaHistory.run(newMessage, oldMessage).catch(handleError);
 });
 
 client.on('interactionCreate', interaction => {
