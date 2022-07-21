@@ -43,11 +43,11 @@ mongod
 Deploy commands to your bot.
 
 ```sh
-npm run deploy:commands -- --prod
+npm run commands:prod
 ```
 
 Start the bot.
 
 ```sh
-npm run start -- --prod
+npm run start:prod
 ```
