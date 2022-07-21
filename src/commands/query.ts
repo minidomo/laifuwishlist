@@ -63,7 +63,7 @@ function createCharacterEmbed(character: BotTypes.LeanCharacterDocument | null) 
                     value: `${bold('Global ID:')} ${character.id}\n${bold('Total Images:')} ${
                         character.totalImages
                     }\n${bold('Influence:')} ${character.influence}\n${bold('Rank:')} ${createRankString(
-                        character.influenceRankRange,
+                        character.rank,
                     )}\n`,
                     inline: true,
                 },

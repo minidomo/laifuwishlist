@@ -20,21 +20,13 @@ client.once('ready', () => {
 });
 
 client.on('messageCreate', message => {
-    try {
-        UpdateCharacter.run(message);
-    } catch (err) {
-        handleError(err);
-    }
+    UpdateCharacter.run(message).catch(handleError);
     CheckWishlist.run(message).catch(handleError);
     Reminders.run(message).catch(handleError);
 });
 
 client.on('messageUpdate', (oldMessage, newMessage) => {
-    try {
-        UpdateCharacter.run(newMessage);
-    } catch (err) {
-        handleError(err);
-    }
+    UpdateCharacter.run(newMessage).catch(handleError);
     CheckWishlist.run(newMessage, oldMessage).catch(handleError);
     GachaHistory.run(newMessage, oldMessage).catch(handleError);
 });

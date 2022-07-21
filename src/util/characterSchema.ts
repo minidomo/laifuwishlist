@@ -1,4 +1,4 @@
-import type { BasePersonalSimpleCharacterEmbed, InfoEmbed } from 'laifutil';
+import type { AuctionEmbed, BasePersonalSimpleCharacterEmbed, CluCharacter, InfoEmbed } from 'laifutil';
 
 type CloneableObject = Record<string, any>; // eslint-disable-line
 
@@ -18,7 +18,7 @@ export function fromInfoEmbed(embed: InfoEmbed): BotTypes.PartialCharacterSchema
         name: embed.name,
         id: embed.globalId,
         influence: embed.influence,
-        influenceRankRange: clone(embed.rankRange),
+        rank: clone(embed.rankRange),
         rarities: clone(embed.rarities),
         series: {
             title: {
@@ -33,6 +33,32 @@ export function fromInfoEmbed(embed: InfoEmbed): BotTypes.PartialCharacterSchema
 }
 
 export function fromSimpleCharacter(embed: BasePersonalSimpleCharacterEmbed): BotTypes.PartialCharacterSchema {
+    return {
+        name: embed.name,
+        id: embed.globalId,
+        influence: embed.influence,
+        series: {
+            title: {
+                alternate: embed.series.title.alternate,
+                english: embed.series.title.english,
+            },
+            id: embed.series.id,
+            sequence: embed.series.sequence,
+        },
+    };
+}
+
+export function fromCluCharacter(character: CluCharacter): BotTypes.PartialCharacterSchema {
+    return {
+        id: character.globalId,
+        influence: character.influence,
+        totalImages: character.totalImages,
+        name: character.name,
+        'series.title.english': character.title,
+    };
+}
+
+export function fromAuctionEmbed(embed: AuctionEmbed): BotTypes.PartialCharacterSchema {
     return {
         name: embed.name,
         id: embed.globalId,
