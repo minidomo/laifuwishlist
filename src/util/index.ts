@@ -5,3 +5,4 @@ export * as CharacterSchema from './characterSchema';
 export * from './error';
 export * from './user';
 export * from './character';
+export * as Flags from './flags';

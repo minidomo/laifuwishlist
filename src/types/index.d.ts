@@ -156,5 +156,11 @@ declare global {
 
         // Character map
         type IdType = 'global' | 'series';
+
+        // Flags
+        interface Flag {
+            name: string;
+            value?: string;
+        }
     }
 }
