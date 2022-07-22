@@ -23,8 +23,5 @@ export function parse(str: string): BotTypes.Flag[] {
         })
         .filter(flag => flag.name !== '-');
 
-    const map: Map<string, BotTypes.Flag> = new Map();
-    arr.forEach(flag => map.set(flag.name, flag));
-
-    return Array.from(map.values());
+    return arr;
 }

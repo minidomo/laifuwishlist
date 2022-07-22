@@ -1,10 +1,19 @@
 import { bold, inlineCode, italic, SlashCommandSubcommandBuilder, time } from '@discordjs/builders';
+import dayjs from 'dayjs';
 import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
-import { BadgeRarity, CharacterRaritySymbol, cleanCharacterName } from 'laifutil';
+import {
+    BadgeRarity,
+    BadgeRarityKey,
+    CharacterRarity,
+    CharacterRarityKey,
+    CharacterRaritySymbol,
+    cleanCharacterName,
+    resolveCharacterRarity,
+} from 'laifutil';
 import { MISSING_INFO } from '../../../constants';
 import { User } from '../../../model';
 import { Pages } from '../../../structures';
-import { Flags } from '../../../util';
+import { Flags, handleError } from '../../../util';
 import {
     compareBadgeId,
     compareBadgeRarity,
@@ -78,7 +87,7 @@ export async function execute(interaction: ChatInputCommandInteraction, unique: 
 
         if (filterString) {
             const filters = Flags.parse(filterString);
-            gachaResultArr = applyFilters(gachaResultArr, filters);
+            gachaResultArr = applyFilters(gachaResultArr, gachaType, filters);
         }
 
         gachaResultArr = applySort(gachaResultArr, gachaType, sortType);
@@ -108,12 +117,129 @@ export function isPermitted(_interaction: ChatInputCommandInteraction) {
     return true;
 }
 
-function applyFilters(arr: BotTypes.GachaResult[], filters: BotTypes.Flag[]): BotTypes.GachaResult[] {
-    if (filters.length < 0) {
-        return arr;
-    }
+function applyFilters(
+    arr: BotTypes.GachaResult[],
+    gachaType: BotTypes.GachaType,
+    filters: BotTypes.Flag[],
+): BotTypes.GachaResult[] {
+    let ret = arr.slice();
 
-    return arr;
+    filters.forEach(flag => {
+        try {
+            switch (flag.name) {
+                case '24hours': {
+                    const date = dayjs().subtract(24, 'hours');
+                    ret = ret.filter(e => dayjs(e.result.createdAt).isAfter(date));
+                    break;
+                }
+                case '7days': {
+                    const date = dayjs().subtract(7, 'days');
+                    ret = ret.filter(e => dayjs(e.result.createdAt).isAfter(date));
+                    break;
+                }
+                case 'inf-lt': {
+                    if (flag.value) {
+                        const inf = parseInt(flag.value);
+                        ret = ret.filter(e => e.character && e.character.influence <= inf);
+                    }
+                    break;
+                }
+                case 'inf-gt': {
+                    if (flag.value) {
+                        const inf = parseInt(flag.value);
+                        ret = ret.filter(e => e.character && e.character.influence >= inf);
+                    }
+                    break;
+                }
+                case 'series': {
+                    if (gachaType === 'character' && flag.value) {
+                        const regex = new RegExp(flag.value, 'i');
+                        ret = ret.filter(e => e.character && regex.test(e.character.series.title.english));
+                    }
+                    break;
+                }
+                case 'name': {
+                    if (flag.value) {
+                        const regex = new RegExp(flag.value, 'i');
+                        if (gachaType === 'character') {
+                            ret = ret.filter(e => e.character && regex.test(e.character.name));
+                        } else {
+                            ret = ret.filter(e => regex.test(e.result.title as string));
+                        }
+                    }
+                    break;
+                }
+                case 'seq': {
+                    if (gachaType === 'character' && flag.value) {
+                        const regex = new RegExp(flag.value, 'i');
+                        ret = ret.filter(e => e.character && regex.test(e.character.series.sequence));
+                    }
+                    break;
+                }
+                case 'rarity-lt': {
+                    if (!flag.value) break;
+
+                    const rarity = flag.value.toUpperCase().replace(/ +/, '_');
+                    if (gachaType === 'character') {
+                        const rarityValue = CharacterRarity[rarity as CharacterRarityKey];
+                        if (typeof rarityValue === 'undefined') break;
+
+                        ret = ret.filter(
+                            e => CharacterRarity[resolveCharacterRarity(e.result.rarity as string)] <= rarityValue,
+                        );
+                    } else {
+                        const rarityValue = BadgeRarity[rarity as BadgeRarityKey];
+                        if (typeof rarityValue === 'undefined') break;
+
+                        ret = ret.filter(e => (e.result.tier as number) <= rarityValue);
+                    }
+                    break;
+                }
+                case 'rarity-gt': {
+                    if (!flag.value) break;
+
+                    const rarity = flag.value.toUpperCase().replace(/ +/, '_');
+                    if (gachaType === 'character') {
+                        const rarityValue = CharacterRarity[rarity as CharacterRarityKey];
+                        if (typeof rarityValue === 'undefined') break;
+
+                        ret = ret.filter(
+                            e => CharacterRarity[resolveCharacterRarity(e.result.rarity as string)] >= rarityValue,
+                        );
+                    } else {
+                        const rarityValue = BadgeRarity[rarity as BadgeRarityKey];
+                        if (typeof rarityValue === 'undefined') break;
+
+                        ret = ret.filter(e => (e.result.tier as number) >= rarityValue);
+                    }
+                    break;
+                }
+                case 'rarity': {
+                    if (!flag.value) break;
+
+                    const rarity = flag.value.toUpperCase().replace(/ +/, '_');
+                    if (gachaType === 'character') {
+                        const rarityValue = CharacterRarity[rarity as CharacterRarityKey];
+                        if (typeof rarityValue === 'undefined') break;
+
+                        ret = ret.filter(
+                            e => CharacterRarity[resolveCharacterRarity(e.result.rarity as string)] === rarityValue,
+                        );
+                    } else {
+                        const rarityValue = BadgeRarity[rarity as BadgeRarityKey];
+                        if (typeof rarityValue === 'undefined') break;
+
+                        ret = ret.filter(e => (e.result.tier as number) === rarityValue);
+                    }
+                    break;
+                }
+            }
+        } catch (err) {
+            handleError(err);
+        }
+    });
+
+    return ret;
 }
 
 function applySort(
