@@ -24,7 +24,7 @@ export async function execute(interaction: ChatInputCommandInteraction, _unique:
     const description = await createDescription(maxId);
 
     const embed = new EmbedBuilder().setColor(0xed6a5a).setTitle('Missing Information')
-        .setDescription(description);
+.setDescription(description);
 
     await interaction.editReply({
         embeds: [embed],
