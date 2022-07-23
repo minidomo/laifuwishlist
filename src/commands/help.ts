@@ -13,7 +13,6 @@ const embed = new EmbedBuilder()
     .setFooter({ text: 'Developed by JB#9224' });
 
 export const data = new SlashCommandBuilder()
-    .addStringOption(option => option.setName('command').setDescription('Command to check'))
     .setName('help')
     .setDescription('Shows information about the bot');
 
