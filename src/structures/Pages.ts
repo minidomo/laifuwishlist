@@ -1,4 +1,3 @@
-import type { EmbedFooterData } from '@discordjs/builders';
 import {
     ActionRowBuilder,
     ButtonBuilder,
@@ -6,6 +5,7 @@ import {
     ChatInputCommandInteraction,
     ComponentType,
     EmbedBuilder,
+    EmbedFooterData,
     MessageComponentInteraction,
     ModalSubmitInteraction,
     TextChannel,

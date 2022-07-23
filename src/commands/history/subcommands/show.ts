@@ -1,6 +1,13 @@
-import { bold, inlineCode, italic, SlashCommandSubcommandBuilder, time } from '@discordjs/builders';
 import dayjs from 'dayjs';
-import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import {
+    bold,
+    ChatInputCommandInteraction,
+    EmbedBuilder,
+    inlineCode,
+    italic,
+    SlashCommandSubcommandBuilder,
+    time,
+} from 'discord.js';
 import {
     BadgeRarity,
     BadgeRarityKey,

@@ -1,4 +1,3 @@
-import { inlineCode, SlashCommandBuilder } from '@discordjs/builders';
 import {
     ChatInputCommandInteraction,
     Guild,
@@ -8,6 +7,8 @@ import {
     ActionRowBuilder,
     TextInputStyle,
     ModalBuilder,
+    SlashCommandBuilder,
+    inlineCode,
 } from 'discord.js';
 import { cleanCharacterName } from 'laifutil';
 import { MISSING_INFO } from '../constants';

@@ -1,5 +1,4 @@
-import { bold, inlineCode, SlashCommandBuilder } from '@discordjs/builders';
-import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import { bold, ChatInputCommandInteraction, EmbedBuilder, inlineCode, SlashCommandBuilder } from 'discord.js';
 import { cleanCharacterName } from 'laifutil';
 import { INFLUENCE_EMOJI, MISSING_INFO } from '../constants';
 import { User } from '../model';
