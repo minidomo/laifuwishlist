@@ -1,6 +1,5 @@
 import { setTimeout } from 'node:timers/promises';
-import { userMention } from '@discordjs/builders';
-import type { Message } from 'discord.js';
+import { Message, userMention } from 'discord.js';
 import { DropOpenedEmbed, isDropOpenedEmbed, isLaifuBot, isMedalDropActiveEmbed } from 'laifutil';
 import { User } from '../model';
 

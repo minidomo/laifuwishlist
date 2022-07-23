@@ -1,5 +1,4 @@
-import { inlineCode, SlashCommandBuilder } from '@discordjs/builders';
-import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder, inlineCode, SlashCommandBuilder } from 'discord.js';
 import { Character } from '../model';
 
 export const data = new SlashCommandBuilder()

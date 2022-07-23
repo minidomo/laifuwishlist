@@ -1,13 +1,12 @@
-import { bold, inlineCode, SlashCommandBuilder } from '@discordjs/builders';
 import dayjs from 'dayjs';
-import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import { bold, ChatInputCommandInteraction, EmbedBuilder, inlineCode, SlashCommandBuilder } from 'discord.js';
 import { Bounds, CharacterRarityStatistics, CharacterRaritySymbol } from 'laifutil';
 import { Character } from '../model';
 
 export const data = new SlashCommandBuilder()
     .addIntegerOption(option => option.setMinValue(0).setName('global_id').setDescription('Global ID of a character'))
     .setName('query')
-    .setDescription('Query a character from the database.');
+    .setDescription('Query the database.');
 
 // eslint-disable-next-line
 export async function execute(interaction: ChatInputCommandInteraction, _unique: BotTypes.Unique) {

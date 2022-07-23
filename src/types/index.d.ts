@@ -1,9 +1,11 @@
 import {
+    ChatInputCommandInteraction,
+    EmbedBuilder,
+    ModalSubmitInteraction,
     SlashCommandBuilder,
     SlashCommandSubcommandBuilder,
     SlashCommandSubcommandsOnlyBuilder,
-} from '@discordjs/builders';
-import { ChatInputCommandInteraction, EmbedBuilder, ModalSubmitInteraction } from 'discord.js';
+} from 'discord.js';
 import type { Document, LeanDocument } from 'mongoose';
 
 declare global {

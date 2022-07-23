@@ -1,6 +1,12 @@
-import { bold, EmbedFooterData, inlineCode, SlashCommandSubcommandBuilder } from '@discordjs/builders';
 import dayjs from 'dayjs';
-import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import {
+    bold,
+    ChatInputCommandInteraction,
+    EmbedBuilder,
+    EmbedFooterData,
+    inlineCode,
+    SlashCommandSubcommandBuilder,
+} from 'discord.js';
 import { CharacterRarity, CharacterRarityKey, CharacterRaritySymbol, resolveCharacterRarity } from 'laifutil';
 import { INFLUENCE_EMOJI } from '../../../constants';
 import { User } from '../../../model';

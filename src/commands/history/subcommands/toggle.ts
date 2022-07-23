@@ -1,5 +1,4 @@
-import { SlashCommandSubcommandBuilder } from '@discordjs/builders';
-import type { ChatInputCommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandSubcommandBuilder } from 'discord.js';
 import { findUser } from '../../../util';
 
 export const data = new SlashCommandSubcommandBuilder()
